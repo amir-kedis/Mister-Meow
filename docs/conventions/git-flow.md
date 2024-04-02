@@ -1,5 +1,14 @@
 # Hola Amigos This file is a suggested workflow for this project only
 
+<!--toc:start-->
+
+- [Hola Amigos This file is a suggested workflow for this project only](#hola-amigos-this-file-is-a-suggested-workflow-for-this-project-only)
+  - [Commit msgs:](#commit-msgs)
+    - [available types:](#available-types)
+      - [examples:](#examples)
+  - [Considering branching:](#considering-branching)
+  <!--toc:end-->
+
 ## Commit msgs:
 
 commit msgs should take the following format
