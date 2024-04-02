@@ -7,8 +7,14 @@
     <br />
 </h1>
 
+<!--toc:start-->
+
+- [Contributions](#contributions)
+<!--toc:end-->
+
 ## Contributions
 
 Please check the following documents before contributing:
 
 - [Git flow](/docs/conventions/git-flow.md)
+- [Java setup](/docs/conventions/java-env.md)
