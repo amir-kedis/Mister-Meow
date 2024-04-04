@@ -12,6 +12,10 @@
 - [Contributions](#contributions)
 <!--toc:end-->
 
+## Draft System Design
+
+![System Design](./docs/imgs/draft-system-design.png)
+
 ## Contributions
 
 Please check the following documents before contributing:
