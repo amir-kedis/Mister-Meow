@@ -14,7 +14,17 @@
 
 ## Draft System Design
 
+### Basic System component
+
 ![System Design](./docs/imgs/draft-system-design.png)
+
+### Indexer DB Design
+
+![indexer DB Design](./docs/imgs/IndexerDB.excalidraw.png)
+
+### Build Inverte Index Algorithem
+
+![Build Index](./docs/imgs/build-the-index-algo.excalidraw.png)
 
 ## Contributions
 
