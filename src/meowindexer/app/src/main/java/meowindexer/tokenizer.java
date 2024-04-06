@@ -12,20 +12,46 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 public class tokenizer {
+  // NOTE: SUBCLASS Token
+  // =====================
+
+  /**
+   * Token class: represents a token with its count and position in the document
+   *
+   * @word: The token
+   * @count: The number of times the token appears in the document
+   * @position: The position of the token in the document (title, h1, h2, or
+   *            other)
+   *
+   */
   public class Token {
     public String word;
     public int count;
+    public String position;
 
+    /**
+     * Constructor for the Token class
+     *
+     * @param word: The token
+     */
     public Token(String word) {
       this.word = word;
       this.count = 1;
+      this.position = "other";
     }
 
+    /**
+     * Increment the count of the token
+     */
     public void increment() { count++; }
   }
 
+  // NOTE: CLASS tokenizer |||| Data Members
   private HashSet<String> stopWords;
 
+  /**
+   * Constructor for the tokenizer: loads
+   */
   public tokenizer() {
     stopWords = new HashSet<String>();
     loadStopWords("stopwords-en.txt");
@@ -44,6 +70,8 @@ public class tokenizer {
         tokenMap.put(token, new Token(token));
       }
     }
+
+    fillPosistions(tokenMap, doc);
 
     return tokenMap;
   }
@@ -116,7 +144,31 @@ public class tokenizer {
   private boolean isStopWord(String word) { return stopWords.contains(word); }
 
   /**
+   * Fill the position of each token in the document (title, h1, h2, or other)
+   *
+   * @param tokens: Map of tokens
+   * @param doc:    Document to search for token positions
+   */
+  private void fillPosistions(HashMap<String, Token> tokens, Document doc) {
+    List<String> titleTokens = stemTokens(tokenizeString(doc.title()));
+    List<String> h1Tokens = stemTokens(tokenizeString(doc.select("h1").text()));
+    List<String> h2Tokens = stemTokens(tokenizeString(doc.select("h2").text()));
+
+    for (String token : tokens.keySet()) {
+      Token t = tokens.get(token);
+      if (titleTokens.contains(t.word)) {
+        t.position = "title";
+      } else if (h1Tokens.contains(t.word)) {
+        t.position = "h1";
+      } else if (h2Tokens.contains(t.word)) {
+        t.position = "h2";
+      }
+    }
+  }
+
+  /**
    * Test the tokenizer
+   * visit https://en.wikipedia.org/wiki/Cat and print the tokens
    */
   public void test() {
     final String ANSI_RESET = "\u001B[0m";
@@ -144,8 +196,10 @@ public class tokenizer {
         .stream()
         .sorted((e1, e2) -> e1.getValue().count - e2.getValue().count)
         .forEach(e
-                 -> System.out.println(ANSI_YELLOW + "{ " + e.getKey() + " : " +
-                                       e.getValue().count + " }" +
-                                       ANSI_RESET2));
+                 -> System.out.println(ANSI_YELLOW + "{ "
+                                       + "word: " + e.getKey() + ", "
+                                       + "count: " + e.getValue().count + ", "
+                                       + "position: " + e.getValue().position +
+                                       " }" + ANSI_RESET2));
   }
 }
