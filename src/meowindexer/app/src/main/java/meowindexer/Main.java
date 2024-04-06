@@ -15,5 +15,9 @@ public class Main {
     System.out.println("||       ncy MeowMister SE.       ||");
     System.out.println("====================================");
     System.out.println(ANSI_RESET);
+
+    tokenizer t = new tokenizer();
+
+    t.test();
   }
 }
