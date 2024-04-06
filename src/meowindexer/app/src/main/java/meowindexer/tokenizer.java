@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import opennlp.tools.stemmer.PorterStemmer;
@@ -11,6 +12,18 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 public class tokenizer {
+  public class Token {
+    public String word;
+    public int count;
+
+    public Token(String word) {
+      this.word = word;
+      this.count = 1;
+    }
+
+    public void increment() { count++; }
+  }
+
   private HashSet<String> stopWords;
 
   public tokenizer() {
@@ -18,13 +31,21 @@ public class tokenizer {
     loadStopWords("stopwords-en.txt");
   }
 
-  public void tokenize(Document doc) {
+  public HashMap<String, Token> tokenize(Document doc) {
     String text = doc.text();
     List<String> tokens = tokenizeString(text);
     tokens = stemTokens(tokens);
+    HashMap<String, Token> tokenMap = new HashMap<String, Token>();
+
     for (String token : tokens) {
-      System.out.println(token);
+      if (tokenMap.containsKey(token)) {
+        tokenMap.get(token).increment();
+      } else {
+        tokenMap.put(token, new Token(token));
+      }
     }
+
+    return tokenMap;
   }
 
   /**
@@ -114,6 +135,17 @@ public class tokenizer {
     }
 
     System.out.println("tokenizing: " + url + " : " + doc.title());
-    tokenize(doc);
+    HashMap<String, Token> tokens = tokenize(doc);
+    // print sorted by count
+    System.out.println("Sorted by count:");
+    final String ANSI_YELLOW = "\u001B[33m";
+    final String ANSI_RESET2 = "\u001B[0m";
+    tokens.entrySet()
+        .stream()
+        .sorted((e1, e2) -> e1.getValue().count - e2.getValue().count)
+        .forEach(e
+                 -> System.out.println(ANSI_YELLOW + "{ " + e.getKey() + " : " +
+                                       e.getValue().count + " }" +
+                                       ANSI_RESET2));
   }
 }
