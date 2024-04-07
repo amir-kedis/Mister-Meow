@@ -8,11 +8,14 @@ public class Main {
   public static void main(String[] args) {
     URLsHandler urlEx = new URLsHandler();
 
+    RobotsManager rm = new RobotsManager();
+    rm.FetchRobots("https://en.wikipedia.org/wiki/Main_Page");
+
     try {
       Document doc =
-          Jsoup.connect("https://zagsystems.org/softwaregia24").get();
+          Jsoup.connect("https://en.wikipedia.org/wiki/Main_Page").get();
       List<String> urls =
-          urlEx.HandleURLs(doc, "https://zagsystems.org/softwaregia24");
+          urlEx.HandleURLs(doc, "https://en.wikipedia.org/wiki/Main_Page");
       for (String url : urls) {
         System.out.println(url);
       }
