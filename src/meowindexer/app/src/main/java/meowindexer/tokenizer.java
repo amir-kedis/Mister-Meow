@@ -57,10 +57,15 @@ public class tokenizer {
     loadStopWords("stopwords-en.txt");
   }
 
+  /**
+   * Tokenize a document
+   *
+   * @param doc: Document to tokenize
+   * @return Map of tokens
+   */
   public HashMap<String, Token> tokenize(Document doc) {
     String text = doc.text();
     List<String> tokens = tokenizeString(text);
-    tokens = stemTokens(tokens);
     HashMap<String, Token> tokenMap = new HashMap<String, Token>();
 
     for (String token : tokens) {
@@ -98,50 +103,29 @@ public class tokenizer {
   }
 
   /**
-   * Tokenize a string into words and remove non-alphabetic characters
+   * Tokenize a string into words
+   * * Remove non-alphabetic characters
+   * * Remove stop words
+   * * Stem the words
    *
    * @param text: String to tokenize
    * @return List of tokens
    */
   private List<String> tokenizeString(String text) {
     List<String> tokens = new ArrayList<String>();
+    PorterStemmer stemmer = new PorterStemmer();
 
     String cleanText = text.toLowerCase().replaceAll("[^a-zA-Z ]", "");
     String[] words = cleanText.split("\\s+");
 
     for (String word : words) {
-      if (word.length() > 1 && !isStopWord(word.trim())) {
-        tokens.add(word.trim());
+      if (word.length() > 1 && !stopWords.contains(word)) {
+        tokens.add(stemmer.stem(word));
       }
     }
 
     return tokens;
   }
-
-  /**
-   * Stem tokens using the Porter Stemmer
-   *
-   * @param tokens: List of tokens to stem
-   * @return List of stemmed tokens
-   */
-  private List<String> stemTokens(List<String> tokens) {
-    List<String> stemmedTokens = new ArrayList<String>();
-    PorterStemmer stemmer = new PorterStemmer();
-
-    for (String token : tokens) {
-      stemmedTokens.add(stemmer.stem(token));
-    }
-
-    return stemmedTokens;
-  }
-
-  /**
-   * Check if a word is a stop word
-   *
-   * @param word: Word to check
-   * @return True if the word is a stop word, false otherwise
-   */
-  private boolean isStopWord(String word) { return stopWords.contains(word); }
 
   /**
    * Fill the position of each token in the document (title, h1, h2, or other)
@@ -150,9 +134,9 @@ public class tokenizer {
    * @param doc:    Document to search for token positions
    */
   private void fillPosistions(HashMap<String, Token> tokens, Document doc) {
-    List<String> titleTokens = stemTokens(tokenizeString(doc.title()));
-    List<String> h1Tokens = stemTokens(tokenizeString(doc.select("h1").text()));
-    List<String> h2Tokens = stemTokens(tokenizeString(doc.select("h2").text()));
+    List<String> titleTokens = tokenizeString(doc.title());
+    List<String> h1Tokens = tokenizeString(doc.select("h1").text());
+    List<String> h2Tokens = tokenizeString(doc.select("h2").text());
 
     for (String token : tokens.keySet()) {
       Token t = tokens.get(token);
