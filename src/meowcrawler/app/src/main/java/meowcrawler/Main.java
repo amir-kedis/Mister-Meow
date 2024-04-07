@@ -7,15 +7,15 @@ import org.jsoup.nodes.Document;
 public class Main {
   public static void main(String[] args) {
     URLsHandler urlEx = new URLsHandler();
+    String baseURL = "https://en.wikipedia.org";
 
     RobotsManager rm = new RobotsManager();
-    rm.FetchRobots("https://en.wikipedia.org/wiki/Main_Page");
+    Document robotsDoc = rm.FetchRobots(baseURL);
+    List<String> disallowedUrls = rm.ExtractDisallowedURLs(robotsDoc);
 
     try {
-      Document doc =
-          Jsoup.connect("https://en.wikipedia.org/wiki/Main_Page").get();
-      List<String> urls =
-          urlEx.HandleURLs(doc, "https://en.wikipedia.org/wiki/Main_Page");
+      Document doc = Jsoup.connect(baseURL).get();
+      List<String> urls = urlEx.HandleURLs(doc, baseURL);
       for (String url : urls) {
         System.out.println(url);
       }
