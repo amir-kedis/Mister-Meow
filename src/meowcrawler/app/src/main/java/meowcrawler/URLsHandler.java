@@ -31,6 +31,8 @@ public class URLsHandler {
     // Call a private function to normalize the urls.
     urls = NormalizeURLs(urls, baseURL);
 
+    RobotsManager robotsM = new RobotsManager();
+
     return urls;
   }
 
