@@ -22,6 +22,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.17.2'
     implementation group: 'org.apache.opennlp', name: 'opennlp-tools', version: '2.3.2'
     implementation libs.guava
+    implementation("com.google.guava:guava:33.1.0-jre")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
