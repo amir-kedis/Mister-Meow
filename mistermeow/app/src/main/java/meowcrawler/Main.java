@@ -1,4 +1,4 @@
-package meowcrawler;
+package src.main.java.meowcrawler;
 
 import java.util.List;
 import java.util.Set;

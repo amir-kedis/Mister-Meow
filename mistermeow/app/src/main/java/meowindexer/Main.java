@@ -1,4 +1,4 @@
-package meowindexer;
+package src.main.java.meowindexer;
 
 public class Main {
 

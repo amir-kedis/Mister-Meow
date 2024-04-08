@@ -1,4 +1,4 @@
-package meowindexer;
+package src.main.java.meowindexer;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

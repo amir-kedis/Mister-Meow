@@ -1,4 +1,4 @@
-package meowdbmanager;
+package src.main.java.meowdbmanager;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.*;
