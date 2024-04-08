@@ -1,4 +1,4 @@
-package meowcrawler;
+package src.main.java.meowcrawler;
 
 import java.net.URI;
 import java.util.ArrayList;
