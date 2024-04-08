@@ -32,6 +32,7 @@ public class URLsHandler {
     urls = NormalizeURLs(urls, baseURL);
 
     RobotsManager robotsM = new RobotsManager();
+    urls = robotsM.ExcludeRobotsURLs(urls, baseURL);
 
     return urls;
   }

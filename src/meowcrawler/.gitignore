@@ -3,3 +3,8 @@
 
 # Ignore Gradle build output directory
 build
+
+# Ignore Eclipse files
+.classpath
+.project
+org.eclipse.jdt.core.prefs
