@@ -10,8 +10,6 @@ public class Main {
     String baseURL = "https://en.wikipedia.org";
 
     RobotsManager rm = new RobotsManager();
-    Document robotsDoc = rm.FetchRobots(baseURL);
-    List<String> disallowedUrls = rm.ExtractDisallowedURLs(robotsDoc);
 
     try {
       Document doc = Jsoup.connect(baseURL).get();
