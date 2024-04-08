@@ -63,18 +63,34 @@ task runDBManager(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+task runDBInit(type: Exec) {
+    commandLine '../database/DBInit.sh'
+}
+
+task runDBCleanup(type: Exec) {
+    commandLine '../database/DBCleanup.sh'
+}
+
+runIndexer.dependsOn runDBInit
+runCrawler.dependsOn runDBInit
+runDBManager.dependsOn runDBInit
+
+runIndexer.finalizedBy runDBCleanup
+runCrawler.finalizedBy runDBCleanup
+runDBManager.finalizedBy runDBCleanup
+
 tasks.register('crawl') {
-    group = "mistermeow run tasks"
+    group = "mistermeow run"
     dependsOn runCrawler
 }
 
 tasks.register('index') {
-    group = "mistermeow run tasks"
+    group = "mistermeow run"
     dependsOn runIndexer
 }
 
 tasks.register('dbmanager') {
-    group = "mistermeow run tasks"
+    group = "mistermeow run"
     dependsOn runDBManager
 }
 
