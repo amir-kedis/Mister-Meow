@@ -1,6 +1,7 @@
 package meowcrawler;
 
 import java.util.List;
+import java.util.Set;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -13,7 +14,7 @@ public class Main {
 
     try {
       Document doc = Jsoup.connect(baseURL).get();
-      List<String> urls = urlEx.HandleURLs(doc, baseURL);
+      Set<String> urls = urlEx.HandleURLs(doc, baseURL);
       for (String url : urls) {
         System.out.println(url);
       }

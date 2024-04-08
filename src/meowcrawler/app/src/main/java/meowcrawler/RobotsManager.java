@@ -1,9 +1,7 @@
 package meowcrawler;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,14 +20,12 @@ public class RobotsManager {
    *
    * @return a list of urls that IS NOT in the robots file.
    */
-  public List<String> ExcludeRobotsURLs(List<String> urls, String baseUrlStr) {
-    List<String> newUrlsList = new ArrayList<String>();
+  public Set<String> ExcludeRobotsURLs(Set<String> urls, String baseUrlStr) {
+    Set<String> newUrlsList = new HashSet<>();
 
     // Fetch robots file as a document, then extract disallowed urls from it.
     Document robotsDoc = FetchRobots(baseUrlStr);
     Set<String> ExcludedUrls = ExtractDisallowedURLs(robotsDoc);
-
-    int counter = 0;
 
     // For each url in the urls list, if it contains any url from the robots
     // file, exclude it.

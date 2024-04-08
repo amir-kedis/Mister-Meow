@@ -2,7 +2,9 @@ package meowcrawler;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -14,10 +16,10 @@ public class URLsHandler {
    *
    * @param baseURL: the current html document URL.
    * @param html:    the html document to extract and normalize urls from.
-   * @return List of URLs.
+   * @return Set of URLs.
    */
-  public List<String> HandleURLs(Document html, String baseURL) {
-    List<String> urls = new ArrayList<String>();
+  public Set<String> HandleURLs(Document html, String baseURL) {
+    Set<String> urls = new HashSet<>();
 
     /*
      * Extract anchor tags from the html document, then extract urls from each a
@@ -38,14 +40,14 @@ public class URLsHandler {
   }
 
   /**
-   * Normalize a list of urls, based on a baseURL.
+   * Normalize a Set of urls, based on a baseURL.
    *
-   * @param urls:    the list of urls represented as strings.
+   * @param urls:    the Set of urls represented as strings.
    * @param baseURL: the base url in which we normalize upon the other urls.
-   * @returns a list of normalized urls of type string.
+   * @returns a Set of normalized urls of type string.
    */
-  private List<String> NormalizeURLs(List<String> urls, String baseURL) {
-    List<String> normalizedURLs = new ArrayList<String>();
+  private Set<String> NormalizeURLs(Set<String> urls, String baseURL) {
+    Set<String> normalizedURLs = new HashSet<>();
 
     // Get the absolute URL from the base url.
     URI newBaseURL = URI.create(baseURL);
@@ -66,7 +68,7 @@ public class URLsHandler {
         }
       }
 
-      // Add the normalized URL to the list
+      // Add the normalized URL to the Set
       normalizedURLs.add(normalizedURL);
     }
 
