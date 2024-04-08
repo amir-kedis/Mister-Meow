@@ -63,6 +63,22 @@ task runDBManager(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+task runDBInit(type: Exec) {
+    commandLine '../database/DBInit.sh'
+}
+
+task runDBCleanup(type: Exec) {
+    commandLine '../database/DBCleanup.sh'
+}
+
+runIndexer.dependsOn runDBInit
+runCrawler.dependsOn runDBInit
+runDBManager.dependsOn runDBInit
+
+runIndexer.finalizedBy runDBCleanup
+runCrawler.finalizedBy runDBCleanup
+runDBManager.finalizedBy runDBCleanup
+
 task runQueueManager(type: JavaExec) {
     // Define the main class for the application.
     main = 'src.main.java.meowcrawler.QueueManagerMain'
