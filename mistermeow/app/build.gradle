@@ -63,21 +63,17 @@ task runDBManager(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-task runDBInit(type: Exec) {
-    commandLine '../database/DBInit.sh'
+task runQueueManager(type: JavaExec) {
+    // Define the main class for the application.
+    main = 'src.main.java.meowcrawler.QueueManagerMain'
+    // Define the classpath for the application.
+    classpath = sourceSets.main.runtimeClasspath
 }
 
-task runDBCleanup(type: Exec) {
-    commandLine '../database/DBCleanup.sh'
+tasks.register('queueManager') {
+    group = "mistermeow run"
+    dependsOn runQueueManager
 }
-
-runIndexer.dependsOn runDBInit
-runCrawler.dependsOn runDBInit
-runDBManager.dependsOn runDBInit
-
-runIndexer.finalizedBy runDBCleanup
-runCrawler.finalizedBy runDBCleanup
-runDBManager.finalizedBy runDBCleanup
 
 tasks.register('crawl') {
     group = "mistermeow run"
