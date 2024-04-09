@@ -6,7 +6,7 @@ import java.util.*;
 
 public class QueueManager {
 
-  private static final int domainQCapacity = 100;
+  private static final int domainQCapacity = 1000;
   private Queue<Url> priorityQ; // priority queue to priotorize urls on pushing
   private PriorityQueue<Queue<Url>> domainQs; // list of domain queues
   private BiMap<String, Queue<Url>>
