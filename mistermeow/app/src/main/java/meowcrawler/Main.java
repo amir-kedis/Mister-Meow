@@ -10,6 +10,9 @@ public class Main {
     URLsHandler urlEx = new URLsHandler();
     String baseURL = "https://en.wikipedia.org";
 
+    HashingManager hm = new HashingManager();
+    System.out.println(hm.HashFunction("Hello"));
+
     RobotsManager rm = new RobotsManager();
 
     try {
