@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
 if [ -d "../database/dbDump" ]; then
-  # Store database into a dump file
-  echo "Export Database..."
-  mongodump --db meowDB --out ../database/dbDump
-else
-  echo "Couldn't Export Database !"
-fi
+	# Store database into a dump file
+	printf "\033[32m||========================||\033[0m\n"
+	printf "\033[32m||  Exporting Database... ||\033[0m\n"
+	printf "\033[32m||========================||\033[0m\n"
 
-# Stop mongodb
-echo "Stop MongoDB..."
-sudo systemctl stop mongod
+	mongodump --db meowDB --out ../database/dbDump
+else
+	echo "Couldn't Export Database !"
+fi
