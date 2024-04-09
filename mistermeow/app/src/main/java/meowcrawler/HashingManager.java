@@ -38,7 +38,7 @@ public class HashingManager {
    *         exists.
    */
   public boolean HashAndCheckURL(String url) {
-    String hashedURL = DigestUtils.md5Hex(url);
+    String hashedURL = this.HashFunction(url);
 
     if (!this.HashedURLs.contains(hashedURL)) {
       HashedURLs.add(hashedURL);
@@ -52,14 +52,14 @@ public class HashingManager {
    * HashedDocs or not.
    *
    * @param url - the url in which we would store as a value if the document
-   *     isn't
+   *            isn't
    *            hashed.
    * @param doc - the html doc represented in a string to hash and check on.
    * @return boolean - true if the doc doesn't exist in HashedDocs, false if it
    *         exists.
    */
   public boolean HashAndCheckDoc(String url, String doc) {
-    String hashedDoc = DigestUtils.md5Hex(doc);
+    String hashedDoc = this.HashFunction(doc);
 
     if (!this.HashedDocs.containsKey(hashedDoc)) {
       HashedDocs.put(hashedDoc, url);

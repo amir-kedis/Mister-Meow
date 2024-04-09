@@ -23,10 +23,8 @@ public class QueueManager {
     domainQListSize = 0;
   }
 
-  public boolean push(String newUrl) {
-    int priority = getPriority(newUrl);
-    Url u = new Url(newUrl, priority);
-    if (priorityQ.add(u)) {
+  public boolean push(Url newUrl) {
+    if (priorityQ.add(newUrl)) {
       System.out.println("Inserted Sucessfully");
       return true;
     }
@@ -53,7 +51,7 @@ public class QueueManager {
 
   public boolean isEmpty() { return domainQs.isEmpty(); }
 
-  private int getPriority(String Url) {
+  public int getPriority(String Url) {
     return (int)(Math.random() * 10);
     // TODO: find better implementation
   }
