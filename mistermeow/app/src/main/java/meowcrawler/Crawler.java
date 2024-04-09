@@ -15,7 +15,23 @@ public class Crawler implements Runnable {
     this.storageFile = fileName;
   }
 
-  public List<String> HandleHashing() { return new ArrayList<String>(); }
+  public List<Url> HandleHashing(Set<String> urls) {
+    List<Url> finalUrls = new ArrayList<>();
+
+    for (String url : urls) {
+      if (!hM.HashAndCheckURL(url)) {
+        continue;
+      }
+
+      Url nUrl = new Url(url, 1);
+      if (nUrl.FillDocument()) {
+        String doc = nUrl.GetDocument().body().text();
+        if (hM.HashAndCheckDoc(nUrl.getUrlString(), doc)) {
+          qM.push(nUrl);
+        }
+      }
+    }
+  }
 
   public void run() {
     Url url = null;
@@ -29,6 +45,7 @@ public class Crawler implements Runnable {
     }
 
     URLsHandler urlH = new URLsHandler();
-    /* Set<String> extractedUrls = urlH.HandleURLs(url.Document, url.) */
+    Set<String> extractedUrls =
+        urlH.HandleURLs(url.GetDocument(), url.getUrlString());
   }
 }
