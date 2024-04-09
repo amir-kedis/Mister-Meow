@@ -63,6 +63,18 @@ task runDBManager(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+task runQueueManager(type: JavaExec) {
+    // Define the main class for the application.
+    main = 'src.main.java.meowcrawler.QueueManagerMain'
+    // Define the classpath for the application.
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+tasks.register('queueManager') {
+    group = "mistermeow run"
+    dependsOn runQueueManager
+}
+
 task runDBInit(type: Exec) {
     commandLine '../database/DBInit.sh'
 }
