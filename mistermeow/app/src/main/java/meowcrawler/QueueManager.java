@@ -22,7 +22,7 @@ public class QueueManager {
     }
 
     public boolean push(String newUrl) {
-        int priority = (int) (Math.random() * 10);    //TODO: assign getProirity fn
+        int priority = getPriority();
         Url u = new Url(newUrl, priority);
         if (priorityQ.add(u)) {
             System.out.println("Inserted Sucessfully");
@@ -54,8 +54,8 @@ public class QueueManager {
     }
 
     private int getPriority(String Url) {
-        return 1;
-        //TODO: implement
+        return (int) (Math.random() * 10);
+        //TODO: find better implementation
     }
 
     public boolean moveToDomainQ() {
@@ -77,7 +77,6 @@ public class QueueManager {
             }
         }
         q.add(u);
-
         return true;
     }
 
@@ -105,6 +104,9 @@ public class QueueManager {
             print((Queue<Url>)iterator.next());
         }
     }
+    public void printPriorityQ() {
+        print(priorityQ);
+    }
 
     public void print(Queue<Url> ll) {
         Iterator iterator = ll.iterator();
@@ -112,11 +114,6 @@ public class QueueManager {
             System.out.print(iterator.next());
         }
         System.out.println();
-    }
-
-
-    public void printPriorityQ() {
-        print(priorityQ);
     }
 }
 
