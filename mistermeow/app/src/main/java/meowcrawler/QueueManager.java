@@ -22,7 +22,7 @@ public class QueueManager {
     }
 
     public boolean push(String newUrl) {
-        int priority = getPriority();
+        int priority = getPriority(newUrl);
         Url u = new Url(newUrl, priority);
         if (priorityQ.add(u)) {
             System.out.println("Inserted Sucessfully");
