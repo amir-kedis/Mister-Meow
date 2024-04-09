@@ -24,6 +24,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.17.2'
     implementation group: 'org.apache.opennlp', name: 'opennlp-tools', version: '2.3.2'
     implementation 'org.mongodb:mongodb-driver-sync:5.0.1'
+    implementation 'commons-codec:commons-codec:1.13'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -84,11 +85,11 @@ task runDBCleanup(type: Exec) {
 }
 
 runIndexer.dependsOn runDBInit
-runCrawler.dependsOn runDBInit
+/* runCrawler.dependsOn runDBInit */
 runDBManager.dependsOn runDBInit
 
 runIndexer.finalizedBy runDBCleanup
-runCrawler.finalizedBy runDBCleanup
+/* runCrawler.finalizedBy runDBCleanup */
 runDBManager.finalizedBy runDBCleanup
 
 tasks.register('crawl') {
