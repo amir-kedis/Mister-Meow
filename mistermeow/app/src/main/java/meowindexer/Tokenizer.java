@@ -11,7 +11,7 @@ import opennlp.tools.stemmer.PorterStemmer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-public class tokenizer {
+public class Tokenizer {
   // NOTE: SUBCLASS Token
   // =====================
 
@@ -43,7 +43,9 @@ public class tokenizer {
     /**
      * Increment the count of the token
      */
-    public void increment() { count++; }
+    public void increment() {
+      count++;
+    }
   }
 
   // NOTE: CLASS tokenizer |||| Data Members
@@ -52,7 +54,7 @@ public class tokenizer {
   /**
    * Constructor for the tokenizer: loads
    */
-  public tokenizer() {
+  public Tokenizer() {
     stopWords = new HashSet<String>();
     loadStopWords("stopwords-en.txt");
   }
@@ -90,8 +92,7 @@ public class tokenizer {
     try {
       // NOTE: root path is src/meowindexer/app/. everything is relative to this
       // path
-      BufferedReader reader =
-          new BufferedReader(new FileReader("../data/" + filename));
+      BufferedReader reader = new BufferedReader(new FileReader("../data/" + filename));
       String line;
       while ((line = reader.readLine()) != null) {
         stopWords.add(line.trim());
@@ -179,11 +180,10 @@ public class tokenizer {
     tokens.entrySet()
         .stream()
         .sorted((e1, e2) -> e1.getValue().count - e2.getValue().count)
-        .forEach(e
-                 -> System.out.println(ANSI_YELLOW + "{ "
-                                       + "word: " + e.getKey() + ", "
-                                       + "count: " + e.getValue().count + ", "
-                                       + "position: " + e.getValue().position +
-                                       " }" + ANSI_RESET2));
+        .forEach(e -> System.out.println(ANSI_YELLOW + "{ "
+            + "word: " + e.getKey() + ", "
+            + "count: " + e.getValue().count + ", "
+            + "position: " + e.getValue().position +
+            " }" + ANSI_RESET2));
   }
 }
