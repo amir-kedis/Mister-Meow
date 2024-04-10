@@ -2,11 +2,9 @@ package src.main.java.meowdbmanager;
 
 import java.util.HashMap;
 import java.util.List;
-
 import org.bson.Document;
-
-import src.main.java.meowindexer.tokenizer;
-import src.main.java.meowindexer.tokenizer.Token;
+import src.main.java.meowindexer.Tokenizer;
+import src.main.java.meowindexer.Tokenizer.Token;
 
 public class Main {
   public static void main(String[] args) {
@@ -14,7 +12,8 @@ public class Main {
     DBManager dbManager = new DBManager();
 
     // Test inserting a document
-    String docId = dbManager.insertDocument("http://example.com", "Title", "example.com", "Content");
+    String docId = dbManager.insertDocument("http://example.com", "Title",
+        "example.com", "Content");
     System.out.println("Inserted document ID: " + docId);
 
     // Test getting a document
@@ -33,7 +32,7 @@ public class Main {
 
     // Test inserting inverted index
     HashMap<String, Token> tokens = new HashMap<>();
-    tokenizer Tokenizer = new tokenizer();
+    Tokenizer Tokenizer = new Tokenizer();
     Token token = Tokenizer.new Token("example");
     token.count = 1;
     token.position = "h1";
