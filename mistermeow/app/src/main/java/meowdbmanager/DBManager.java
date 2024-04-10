@@ -7,14 +7,13 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
-
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 import java.net.*;
 import java.util.*;
-
 import org.bson.Document;
 import org.bson.types.ObjectId;
-
-import src.main.java.meowindexer.tokenizer.*;
+import src.main.java.meowindexer.Tokenizer.*;
 
 public class DBManager {
   private MongoClient mongoClient;
@@ -48,7 +47,10 @@ public class DBManager {
           .append("indexed", false);
 
       String insertedId = docCollection.insertOne(document)
-          .getInsertedId().asObjectId().getValue().toString();
+          .getInsertedId()
+          .asObjectId()
+          .getValue()
+          .toString();
       return insertedId;
 
     } catch (MalformedURLException | URISyntaxException e) {
@@ -76,14 +78,16 @@ public class DBManager {
               .append("TF", tokens.get(token).count)
               .append("position", tokens.get(token).position));
 
-          Document document = new Document("_id", null)
+          Document document = new Document("_id", new ObjectId())
               .append("token", token)
               .append("docs", docs);
 
           invertedCollection.insertOne(document);
         } else {
 
-          Document update = new Document("$pull", new Document("docs", new Document("_id", new ObjectId(docID))));
+          Document update = new Document(
+              "$pull",
+              new Document("docs", new Document("_id", new ObjectId(docID))));
           invertedCollection.updateOne(new Document("token", token), update);
 
           List<Document> docs = result.getList("docs", Document.class);
@@ -108,17 +112,22 @@ public class DBManager {
       List<Document> docs = new ArrayList<>();
       Document query = new Document("indexed", false);
 
-      docCollection.find(query).limit(limit).forEach(doc -> {
-        if (doc != null) {
-          docs.add(doc);
-        }
-      });
-      docCollection.updateMany(query, new Document("$set", new Document("indexed", true)));
+      List<ObjectId> docIDs = docCollection.find(query)
+          .limit(limit)
+          .projection(Projections.include("_id"))
+          .map(doc -> doc.getObjectId("_id"))
+          .into(new ArrayList<>());
+
+      Document update = new Document("$set", new Document("indexed", true));
+      docCollection.updateMany(Filters.in("_id", docIDs), update);
+
+      docs = docCollection.find(query).limit(limit).into(new ArrayList<>());
 
       return docs;
     } catch (MongoException e) {
 
-      System.out.println("Error occurred while getting documents: " + e.getMessage());
+      System.out.println("Error occurred while getting documents: " +
+          e.getMessage());
       return null;
     }
   }
@@ -129,7 +138,8 @@ public class DBManager {
       return doc;
     } catch (MongoException e) {
 
-      System.out.println("Error occurred while getting document: " + e.getMessage());
+      System.out.println("Error occurred while getting document: " +
+          e.getMessage());
       return null;
     }
   }
@@ -147,7 +157,8 @@ public class DBManager {
       return indices;
     } catch (MongoException e) {
 
-      System.out.println("Error occurred while getting indices: " + e.getMessage());
+      System.out.println("Error occurred while getting indices: " +
+          e.getMessage());
       return null;
     }
   }
