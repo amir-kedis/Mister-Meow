@@ -19,6 +19,7 @@ public class Crawler implements Runnable {
    */
   public List<Url> HandleHashing(Set<String> urls) {
     List<Url> finalUrls = new ArrayList<>();
+    final String ANSI_CYAN = "\u001B[36m";
 
     for (String url : urls) {
       // Hash and check if the url was not crawled (store it if it wasn't)
@@ -42,6 +43,13 @@ public class Crawler implements Runnable {
             synchronized (qM) {
               qM.push(nUrl);
               qM.moveToDomainQ();
+            }
+            // FIXME: amir-kedis: Akram, Review/Refactor this part please
+            synchronized (db) {
+              db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
+                                nUrl.getDomainName(), doc);
+              System.out.println(ANSI_CYAN + "|| Inserted " +
+                                 nUrl.getUrlString() + " into the database ||");
             }
             finalUrls.add(nUrl);
           }
@@ -93,15 +101,14 @@ public class Crawler implements Runnable {
           urlH.HandleURLs(url.GetDocument(), url.getUrlString());
 
       List<Url> urls = HandleHashing(extractedUrls);
-
-      synchronized (db) {
-        for (Url u : urls) {
-          db.insertDocument(u.getUrlString(), u.getTitle(), u.getDomainName(),
-                            u.GetDocument().body().text());
-          System.out.println(ANSI_CYAN + "|| Inserted " + u.getUrlString() +
-                             " into the database ||");
-        }
-      }
+      //
+      // synchronized (db) {
+      // for (Url u : urls) {
+      // db.insertDocument(u.getUrlString(), u.getTitle(), u.getDomainName(),
+      // u.GetDocument().body().text());
+      // System.out.println(ANSI_CYAN + "|| Inserted " + u.getUrlString() +
+      // " into the database ||");
+      // }
 
       i++;
     }
