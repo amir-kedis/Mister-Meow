@@ -25,10 +25,10 @@ public class QueueManager {
 
   public boolean push(Url newUrl) {
     if (priorityQ.add(newUrl)) {
-      System.out.println("Inserted Sucessfully");
+      System.out.println("Inserted Into Queue Sucessfully");
       return true;
     }
-    System.out.println("Error in insertion");
+    System.out.println("Error in insertion into Queue");
     return false;
   }
 
