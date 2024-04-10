@@ -63,9 +63,16 @@ public class Url {
 
   public String getUrlString() { return urlString; }
 
-  String getDomainName() {
+  public String getDomainName() {
     return this.urlString.split("/")[2];
     // another sol:
     // return this.urlStirng.replaceAll("http(s)?://|www\\.|/.*", "");
   }
+
+  /**
+   * Getter for the title of the html document.
+   *
+   * @return the title of the html document.
+   */
+  public String getTitle() { return this.htmlDoc.title(); }
 }
