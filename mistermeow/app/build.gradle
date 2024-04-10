@@ -85,11 +85,11 @@ task runDBCleanup(type: Exec) {
 }
 
 runIndexer.dependsOn runDBInit
-/* runCrawler.dependsOn runDBInit */
+runCrawler.dependsOn runDBInit
 runDBManager.dependsOn runDBInit
 
 runIndexer.finalizedBy runDBCleanup
-/* runCrawler.finalizedBy runDBCleanup */
+runCrawler.finalizedBy runDBCleanup
 runDBManager.finalizedBy runDBCleanup
 
 tasks.register('crawl') {
