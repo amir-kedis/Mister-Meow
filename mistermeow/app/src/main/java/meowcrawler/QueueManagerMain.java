@@ -5,9 +5,12 @@ import java.util.*;
 public class QueueManagerMain {
   public static void main(String[] args) {
     QueueManager q = new QueueManager();
-    q.push("https://en.wikipedia.org");
-    q.push("https://ar.wikipedia.org");
-    q.push("https://fr.wikipedia.org");
+
+    // NOTE: amir-kedis: changed those to url because it wasn't compiling
+    // note sure about the priority values though
+    q.push(new Url("https://en.wikipedia.org", 1));
+    q.push(new Url("https://ar.wikipedia.org", 1));
+    q.push(new Url("https://fr.wikipedia.org", 1));
 
     q.printPriorityQ();
 
