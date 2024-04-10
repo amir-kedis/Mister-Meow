@@ -3,10 +3,12 @@ package src.main.java.meowcrawler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import src.main.java.meowdbmanager.DBManager;
 
 public class Crawler implements Runnable {
   static private HashingManager hM = new HashingManager();
   static private QueueManager qM = new QueueManager();
+  static private DBManager db = new DBManager();
 
   /**
    * HandleHashing - takes a set of urls and hash and check that they were not
@@ -58,8 +60,9 @@ public class Crawler implements Runnable {
    * @return void.
    */
   public void run() {
+    final int depth = 3;
     int i = 0;
-    while (i < 10) {
+    while (i < depth) {
       Url url = null;
       System.out.println(qM.isEmpty());
 
@@ -67,12 +70,20 @@ public class Crawler implements Runnable {
       synchronized (qM) {
         try {
           url = qM.pop();
+          System.out.println("|| Popped " + url.getUrlString() + " ||");
         } catch (Exception e) {
           System.out.println("Queue is empty");
         }
       }
 
       // TODO: save the document to the database.
+      final String ANSI_CYAN = "\u001B[36m";
+      synchronized (db) {
+        db.insertDocument(url.getUrlString(), url.getTitle(),
+                          url.getDomainName(), url.GetDocument().body().text());
+        System.out.println(ANSI_CYAN + "|| Inserted " + url.getUrlString() +
+                           " into the database ||");
+      }
       // TODO: handle that the number of crawled urls doesn't exceed 6000.
 
       // Extract Urls and handle them, hash and check that they was not crawled
@@ -82,6 +93,15 @@ public class Crawler implements Runnable {
           urlH.HandleURLs(url.GetDocument(), url.getUrlString());
 
       List<Url> urls = HandleHashing(extractedUrls);
+
+      synchronized (db) {
+        for (Url u : urls) {
+          db.insertDocument(u.getUrlString(), u.getTitle(), u.getDomainName(),
+                            u.GetDocument().body().text());
+          System.out.println(ANSI_CYAN + "|| Inserted " + u.getUrlString() +
+                             " into the database ||");
+        }
+      }
 
       i++;
     }
