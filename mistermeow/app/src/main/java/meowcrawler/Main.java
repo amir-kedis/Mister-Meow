@@ -2,35 +2,40 @@ package src.main.java.meowcrawler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 public class Main {
   public static void main(String[] args) {
-
-    Url url1 = new Url("https://www.wikipedia.org/", 1);
-    Url url2 = new Url("https://www.google.com/", 1);
-
-    url1.FillDocument();
-    url2.FillDocument();
+    // NOTE: amir-kedis: I refactored this to change the seed manually for
+    // testing
+    // TODO: chagnge this seed to be writeen from a file and the number of
+    // threads to be inputed
 
     List<Url> urls = new ArrayList<>();
-    urls.add(url1);
-    urls.add(url2);
+    urls.add(new Url("https://en.wikipedia.org/wiki/Cat", 1));
+    urls.add(new Url("https://en.wikipedia.org/wiki/Dog", 1));
+    urls.add(new Url("https://en.wikipedia.org/wiki/Bird", 1));
+    urls.add(new Url(
+        "https://www.nationalgeographic.com/animals/mammals/facts/domestic-cat",
+        1));
+
+    for (Url url : urls) {
+      url.FillDocument();
+    }
 
     Crawler.ProvideSeed(urls);
 
-    Thread crawler_one = new Thread(new Crawler());
-    Thread crawler_two = new Thread(new Crawler());
-
-    crawler_one.start();
-    crawler_two.start();
+    List<Thread> threads = new ArrayList<>();
+    for (int i = 0; i < 16; i++) {
+      Thread t = new Thread(new Crawler());
+      threads.add(t);
+      t.start();
+    }
 
     try {
+      for (Thread t : threads) {
+        t.join();
+      }
 
-      crawler_one.join();
-      crawler_two.join();
     } catch (Exception e) {
       System.out.println(e);
     }
