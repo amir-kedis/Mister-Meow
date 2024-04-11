@@ -99,6 +99,10 @@ public class DBManager {
           invertedCollection.updateOne(new Document("token", token), update);
         }
       }
+
+      // update document to be indexed
+      Document update = new Document("$set", new Document("indexed", true));
+      docCollection.updateOne(new Document("_id", new ObjectId(docID)), update);
       return true;
     } catch (MongoException e) {
 
@@ -111,15 +115,6 @@ public class DBManager {
     try {
       List<Document> docs = new ArrayList<>();
       Document query = new Document("indexed", false);
-
-      List<ObjectId> docIDs = docCollection.find(query)
-          .limit(limit)
-          .projection(Projections.include("_id"))
-          .map(doc -> doc.getObjectId("_id"))
-          .into(new ArrayList<>());
-
-      Document update = new Document("$set", new Document("indexed", true));
-      docCollection.updateMany(Filters.in("_id", docIDs), update);
 
       docs = docCollection.find(query).limit(limit).into(new ArrayList<>());
 
