@@ -84,13 +84,15 @@ task runDBCleanup(type: Exec) {
     commandLine '../database/DBCleanup.sh'
 }
 
-runIndexer.dependsOn runDBInit
-runCrawler.dependsOn runDBInit
-runDBManager.dependsOn runDBInit
+tasks.register('dbimport') {
+    group = "mistermeow db"
+    dependsOn runDBInit
+}
 
-runIndexer.finalizedBy runDBCleanup
-runCrawler.finalizedBy runDBCleanup
-runDBManager.finalizedBy runDBCleanup
+tasks.register('dbexport') {
+    group = "mistermeow db"
+    dependsOn runDBCleanup
+}
 
 tasks.register('crawl') {
     group = "mistermeow run"
