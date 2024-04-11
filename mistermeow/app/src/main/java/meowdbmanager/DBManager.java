@@ -7,7 +7,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.Updates;
+
 import java.net.*;
 import java.util.*;
 import meowindexer.Tokenizer.*;
@@ -24,33 +25,33 @@ public class DBManager {
     mongoClient = MongoClients.create("mongodb://localhost:27017");
     DB = mongoClient.getDatabase("meowDB");
 
-    CreateCollectionOptions options =
-        new CreateCollectionOptions().capped(false);
+    CreateCollectionOptions options = new CreateCollectionOptions().capped(false);
     DB.createCollection("Documents", options);
     DB.createCollection("InvertedIndex", options);
 
     invertedCollection = DB.getCollection("InvertedIndex");
     docCollection = DB.getCollection("Documents");
+    invertedCollection.createIndex(new Document("token", 1));
   }
 
   public String insertDocument(String url, String title, String host,
-                               String content) {
+      String content) {
     try {
       // Check for valid URL
       new URL(url).toURI();
 
       Document document = new Document()
-                              .append("URL", url)
-                              .append("title", title)
-                              .append("host", host)
-                              .append("content", content)
-                              .append("indexed", false);
+          .append("URL", url)
+          .append("title", title)
+          .append("host", host)
+          .append("content", content)
+          .append("indexed", false);
 
       String insertedId = docCollection.insertOne(document)
-                              .getInsertedId()
-                              .asObjectId()
-                              .getValue()
-                              .toString();
+          .getInsertedId()
+          .asObjectId()
+          .getValue()
+          .toString();
       return insertedId;
 
     } catch (MalformedURLException | URISyntaxException e) {
@@ -70,34 +71,27 @@ public class DBManager {
 
       for (String token : tokens.keySet()) {
 
-        Document result =
-            invertedCollection.find(new Document("token", token)).first();
+        Document result = invertedCollection.find(new Document("token", token)).first();
         if (result == null) {
 
           List<Document> docs = new ArrayList<>();
           docs.add(new Document("_id", new ObjectId(docID))
-                       .append("TF", tokens.get(token).count)
-                       .append("position", tokens.get(token).position));
+              .append("TF", tokens.get(token).count)
+              .append("position", tokens.get(token).position));
 
-          Document document = new Document("_id", new ObjectId())
-                                  .append("token", token)
-                                  .append("docs", docs);
+          Document document = new Document()
+              .append("token", token)
+              .append("docs", docs);
 
           invertedCollection.insertOne(document);
         } else {
 
-          Document update = new Document(
-              "$pull",
-              new Document("docs", new Document("_id", new ObjectId(docID))));
-          invertedCollection.updateOne(new Document("token", token), update);
+          Document newDoc = new Document("_id", new ObjectId(docID))
+              .append("TF", tokens.get(token).count)
+              .append("position", tokens.get(token).position);
 
-          List<Document> docs = result.getList("docs", Document.class);
-          docs.add(new Document("_id", new ObjectId(docID))
-                       .append("TF", tokens.get(token).count)
-                       .append("position", tokens.get(token).position));
-
-          update = new Document("$set", new Document("docs", docs));
-          invertedCollection.updateOne(new Document("token", token), update);
+          invertedCollection.updateOne(Filters.eq("token", token),
+              Updates.push("docs", newDoc));
         }
       }
 
@@ -123,28 +117,26 @@ public class DBManager {
     } catch (MongoException e) {
 
       System.out.println("Error occurred while getting documents: " +
-                         e.getMessage());
+          e.getMessage());
       return null;
     }
   }
 
   public Document getDocument(String docID) {
     try {
-      Document doc =
-          docCollection.find(new Document("_id", new ObjectId(docID))).first();
+      Document doc = docCollection.find(new Document("_id", new ObjectId(docID))).first();
       return doc;
     } catch (MongoException e) {
 
       System.out.println("Error occurred while getting document: " +
-                         e.getMessage());
+          e.getMessage());
       return null;
     }
   }
 
   public Document getInvertedIndex(String token) {
     try {
-      Document indices =
-          invertedCollection.find(new Document("token", token)).first();
+      Document indices = invertedCollection.find(new Document("token", token)).first();
       if (indices == null)
         return null;
 
@@ -156,7 +148,7 @@ public class DBManager {
     } catch (MongoException e) {
 
       System.out.println("Error occurred while getting indices: " +
-                         e.getMessage());
+          e.getMessage());
       return null;
     }
   }
