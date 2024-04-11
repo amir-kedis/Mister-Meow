@@ -35,7 +35,7 @@ public class Crawler implements Runnable {
       // Fetch the document of the url, then hash and check it.
       if (nUrl.FillDocument()) {
         // Get the text from the html document.
-        String doc = nUrl.GetDocument().body().text();
+        String doc = nUrl.GetDocument().outerHtml();
         synchronized (hM) {
           // Hash and check the html document, and push the Url into the queue,
           // if the doc is new.
@@ -47,9 +47,9 @@ public class Crawler implements Runnable {
             // FIXME: amir-kedis: Akram, Review/Refactor this part please
             synchronized (db) {
               db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
-                                nUrl.getDomainName(), doc);
+                  nUrl.getDomainName(), doc);
               System.out.println(ANSI_CYAN + "|| Inserted " +
-                                 nUrl.getUrlString() + " into the database ||");
+                  nUrl.getUrlString() + " into the database ||");
             }
             finalUrls.add(nUrl);
           }
@@ -88,17 +88,16 @@ public class Crawler implements Runnable {
       final String ANSI_CYAN = "\u001B[36m";
       synchronized (db) {
         db.insertDocument(url.getUrlString(), url.getTitle(),
-                          url.getDomainName(), url.GetDocument().body().text());
+            url.getDomainName(), url.GetDocument().outerHtml());
         System.out.println(ANSI_CYAN + "|| Inserted " + url.getUrlString() +
-                           " into the database ||");
+            " into the database ||");
       }
       // TODO: handle that the number of crawled urls doesn't exceed 6000.
 
       // Extract Urls and handle them, hash and check that they was not crawled
       // before
       URLsHandler urlH = new URLsHandler();
-      Set<String> extractedUrls =
-          urlH.HandleURLs(url.GetDocument(), url.getUrlString());
+      Set<String> extractedUrls = urlH.HandleURLs(url.GetDocument(), url.getUrlString());
 
       List<Url> urls = HandleHashing(extractedUrls);
       //
