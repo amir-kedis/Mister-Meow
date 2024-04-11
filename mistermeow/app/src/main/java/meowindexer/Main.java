@@ -1,11 +1,11 @@
-package src.main.java.meowindexer;
+package meowindexer;
 
 import java.util.HashMap;
 import java.util.List;
+import meowdbmanager.DBManager;
+import meowindexer.Tokenizer.Token;
 import org.bson.Document;
 import org.jsoup.Jsoup;
-import src.main.java.meowdbmanager.DBManager;
-import src.main.java.meowindexer.Tokenizer.Token;
 
 public class Main {
   // Colors for the console output
@@ -36,16 +36,16 @@ public class Main {
         System.out.println(ANSI_PURPLE + "==>Indexing: " + title + ANSI_RESET);
         HashMap<String, Token> tokens = tokenizer.tokenize(contentDoc);
         System.out.println(ANSI_GREEN + "==>Tokens: " + tokens.size() +
-            ANSI_RESET);
+                           ANSI_RESET);
         try {
           db.insertInverted(doc.getObjectId("_id").toString(), tokens);
         } catch (Exception e) {
           System.out.println(ANSI_RED + "==>Error: " + e.getMessage() +
-              ANSI_RESET);
+                             ANSI_RESET);
         }
 
         System.out.println(ANSI_YELLOW + "==>Inserted into db: " + title +
-            ANSI_RESET);
+                           ANSI_RESET);
       }
 
       unindexedDocs = db.getDocumentsNotIndexed(50);
@@ -71,16 +71,16 @@ public class Main {
     System.out.println(ANSI_GREEN +
         "==============================" + ANSI_RESET);
     System.out.println(ANSI_GREEN + "|| Starting patch number: " + patchNumber +
-        " ||" + ANSI_RESET);
+                       " ||" + ANSI_RESET);
     System.out.println(ANSI_GREEN +
         "==============================" + ANSI_RESET);
   }
 
   public static void printFinished() {
     System.out.println(ANSI_RED +
-        "====================================" + ANSI_RESET);
+                       "====================================" + ANSI_RESET);
     System.out.println(ANSI_RED + "|| Finished indexing all docs!  ||" +
-        ANSI_RESET);
+                       ANSI_RESET);
     System.out.println(ANSI_RED +
         "====================================" + ANSI_RESET);
   }

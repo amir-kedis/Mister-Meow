@@ -1,9 +1,7 @@
-package src.main.java.meowcrawler;
+package meowcrawler;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

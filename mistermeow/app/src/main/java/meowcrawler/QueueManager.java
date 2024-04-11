@@ -1,4 +1,4 @@
-package src.main.java.meowcrawler;
+package meowcrawler;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;

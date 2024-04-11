@@ -1,6 +1,5 @@
-package src.main.java.meowcrawler;
+package meowcrawler;
 
-import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

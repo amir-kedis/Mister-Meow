@@ -1,6 +1,4 @@
-package src.main.java.meowcrawler;
-
-import java.util.*;
+package meowcrawler;
 
 public class QueueManagerMain {
   public static void main(String[] args) {

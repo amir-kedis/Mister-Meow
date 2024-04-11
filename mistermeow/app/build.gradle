@@ -45,28 +45,28 @@ sourceSets {
 
 task runIndexer(type: JavaExec) {
     // Define the main class for the application.
-    main = 'src.main.java.meowindexer.Main'
+    main = 'meowindexer.Main'
     // Define the classpath for the application.
     classpath = sourceSets.main.runtimeClasspath
 }
 
 task runCrawler(type: JavaExec) {
     // Define the main class for the application.
-    main = 'src.main.java.meowcrawler.Main'
+    main = 'meowcrawler.Main'
     // Define the classpath for the application.
     classpath = sourceSets.main.runtimeClasspath
 }
 
 task runDBManager(type: JavaExec) {
     // Define the main class for the application.
-    main = 'src.main.java.meowdbmanager.Main'
+    main = 'meowdbmanager.Main'
     // Define the classpath for the application.
     classpath = sourceSets.main.runtimeClasspath
 }
 
 task runQueueManager(type: JavaExec) {
     // Define the main class for the application.
-    main = 'src.main.java.meowcrawler.QueueManagerMain'
+    main = 'QueueManagerMain'
     // Define the classpath for the application.
     classpath = sourceSets.main.runtimeClasspath
 }

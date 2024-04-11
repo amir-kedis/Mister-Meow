@@ -1,9 +1,9 @@
-package src.main.java.meowcrawler;
+package meowcrawler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import src.main.java.meowdbmanager.DBManager;
+import meowdbmanager.DBManager;
 
 public class Crawler implements Runnable {
   static private HashingManager hM = new HashingManager();

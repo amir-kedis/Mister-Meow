@@ -1,10 +1,10 @@
-package src.main.java.meowdbmanager;
+package meowdbmanager;
 
 import java.util.HashMap;
 import java.util.List;
+import meowindexer.Tokenizer;
+import meowindexer.Tokenizer.Token;
 import org.bson.Document;
-import src.main.java.meowindexer.Tokenizer;
-import src.main.java.meowindexer.Tokenizer.Token;
 
 public class Main {
   public static void main(String[] args) {
@@ -13,7 +13,7 @@ public class Main {
 
     // Test inserting a document
     String docId = dbManager.insertDocument("http://example.com", "Title",
-        "example.com", "Content");
+                                            "example.com", "Content");
     System.out.println("Inserted document ID: " + docId);
 
     // Test getting a document

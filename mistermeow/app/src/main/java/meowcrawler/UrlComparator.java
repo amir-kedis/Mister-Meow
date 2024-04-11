@@ -1,4 +1,4 @@
-package src.main.java.meowcrawler;
+package meowcrawler;
 
 import java.util.*;
 
