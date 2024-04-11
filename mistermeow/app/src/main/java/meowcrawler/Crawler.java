@@ -3,6 +3,7 @@ package meowcrawler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import meowdbmanager.DBManager;
 
 public class Crawler implements Runnable {
@@ -17,7 +18,7 @@ public class Crawler implements Runnable {
    * @param urls - the set of urls extracted from the html document.
    * @return list of unique urls that were not crawled before.
    */
-  public List<Url> HandleHashing(Set<String> urls) {
+  static public List<Url> HandleHashing(Set<String> urls) {
     List<Url> finalUrls = new ArrayList<>();
     final String ANSI_CYAN = "\u001B[36m";
 
@@ -47,9 +48,9 @@ public class Crawler implements Runnable {
             // FIXME: amir-kedis: Akram, Review/Refactor this part please
             synchronized (db) {
               db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
-                  nUrl.getDomainName(), doc);
+                                nUrl.getDomainName(), doc);
               System.out.println(ANSI_CYAN + "|| Inserted " +
-                  nUrl.getUrlString() + " into the database ||");
+                                 nUrl.getUrlString() + " into the database ||");
             }
             finalUrls.add(nUrl);
           }
@@ -88,16 +89,17 @@ public class Crawler implements Runnable {
       final String ANSI_CYAN = "\u001B[36m";
       synchronized (db) {
         db.insertDocument(url.getUrlString(), url.getTitle(),
-            url.getDomainName(), url.GetDocument().outerHtml());
+                          url.getDomainName(), url.GetDocument().outerHtml());
         System.out.println(ANSI_CYAN + "|| Inserted " + url.getUrlString() +
-            " into the database ||");
+                           " into the database ||");
       }
       // TODO: handle that the number of crawled urls doesn't exceed 6000.
 
       // Extract Urls and handle them, hash and check that they was not crawled
       // before
       URLsHandler urlH = new URLsHandler();
-      Set<String> extractedUrls = urlH.HandleURLs(url.GetDocument(), url.getUrlString());
+      Set<String> extractedUrls =
+          urlH.HandleURLs(url.GetDocument(), url.getUrlString());
 
       List<Url> urls = HandleHashing(extractedUrls);
       //
@@ -117,9 +119,10 @@ public class Crawler implements Runnable {
    * A static function that provides initial seed for the queueManager.
    */
   static public void ProvideSeed(List<Url> urls) {
-    for (Url url : urls) {
-      qM.push(url);
-      qM.moveToDomainQ();
-    }
+    // FIXME: amir-kedis: Akram, What I did is probably wrong, Review/Refactor
+    // this please.
+    Set<String> seeds =
+        urls.stream().map(Url::getUrlString).collect(Collectors.toSet());
+    HandleHashing(seeds);
   }
 }

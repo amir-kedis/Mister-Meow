@@ -1,5 +1,8 @@
 package meowcrawler;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,15 +14,20 @@ public class Main {
     // threads to be inputed
 
     List<Url> urls = new ArrayList<>();
-    urls.add(new Url("https://en.wikipedia.org/wiki/Cat", 1));
-    urls.add(new Url("https://en.wikipedia.org/wiki/Dog", 1));
-    urls.add(new Url("https://en.wikipedia.org/wiki/Bird", 1));
-    urls.add(new Url(
-        "https://www.nationalgeographic.com/animals/mammals/facts/domestic-cat",
-        1));
 
-    for (Url url : urls) {
-      url.FillDocument();
+    // read seed.txt
+    try {
+      // NOTE: root path is src/meowindexer/app/. everything is relative to this
+      // path
+      BufferedReader reader =
+          new BufferedReader(new FileReader("../data/seed.txt"));
+      String line;
+      while ((line = reader.readLine()) != null) {
+        urls.add(new Url(line, 3));
+      }
+      reader.close();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
 
     Crawler.ProvideSeed(urls);
