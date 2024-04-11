@@ -26,7 +26,7 @@ public class Tokenizer {
    */
   public class Token {
     public String word;
-    public int count;
+    public double count;
     public String position;
 
     /**
@@ -76,6 +76,13 @@ public class Tokenizer {
       } else {
         tokenMap.put(token, new Token(token));
       }
+    }
+
+    // NOTE: we will turn count into TF
+    // The count property may be miss leading, now as it is normalized
+    // TODO: rename count to TF
+    for (String token : tokenMap.keySet()) {
+      tokenMap.get(token).count = tokenMap.get(token).count / tokens.size();
     }
 
     fillPosistions(tokenMap, doc);
@@ -177,13 +184,11 @@ public class Tokenizer {
     System.out.println("Sorted by count:");
     final String ANSI_YELLOW = "\u001B[33m";
     final String ANSI_RESET2 = "\u001B[0m";
-    tokens.entrySet()
-        .stream()
-        .sorted((e1, e2) -> e1.getValue().count - e2.getValue().count)
-        .forEach(e -> System.out.println(ANSI_YELLOW + "{ "
+    tokens.entrySet().stream().forEach(
+        e -> System.out.println(ANSI_YELLOW + "{ "
             + "word: " + e.getKey() + ", "
             + "count: " + e.getValue().count + ", "
-            + "position: " + e.getValue().position +
-            " }" + ANSI_RESET2));
+            + "position: " + e.getValue().position + " }" +
+            ANSI_RESET2));
   }
 }
