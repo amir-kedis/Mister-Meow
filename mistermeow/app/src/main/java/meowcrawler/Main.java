@@ -3,6 +3,7 @@ package meowcrawler;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class Main {
     Crawler.ProvideSeed(urls);
 
     List<Thread> threads = new ArrayList<>();
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 4; i++) {
       Thread t = new Thread(new Crawler());
       threads.add(t);
       t.start();

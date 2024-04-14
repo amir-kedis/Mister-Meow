@@ -49,8 +49,13 @@ public class URLsHandler {
 
     // Get the absolute URL from the base url.
     URI newBaseURL = URI.create(baseURL);
-    String absoluteURL =
-        newBaseURL.getScheme() + "://" + newBaseURL.getAuthority();
+
+    String scheme = newBaseURL.getScheme();
+    if (scheme == null) {
+      scheme = "https";
+    }
+
+    String absoluteURL = scheme + "://" + newBaseURL.getAuthority();
 
     // Loop over urls to normalize them
     for (String url : urls) {
@@ -60,12 +65,17 @@ public class URLsHandler {
       // If url not absolute, make it absolute relative to the base url.
       if (!newURL.isAbsolute()) {
         if (newURL.toString().startsWith("//")) {
-          normalizedURL = newBaseURL.getScheme() + ":" + newURL.toString();
-        } else {
+          normalizedURL = scheme + ":" + newURL.toString();
+        } else if (newURL.toString().startsWith("/")) {
           normalizedURL = absoluteURL + newURL.toString();
+        } else {
+          normalizedURL = scheme + "://" + newURL.toString();
         }
       }
 
+      if (!normalizedURL.endsWith("/")) {
+        normalizedURL += "/";
+      }
       // Add the normalized URL to the Set
       normalizedURLs.add(normalizedURL);
     }
