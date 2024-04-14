@@ -37,25 +37,32 @@ public class Crawler implements Runnable {
       if (nUrl.FillDocument()) {
         // Get the text from the html document.
         String doc = nUrl.GetDocument().outerHtml();
+        boolean insertOrNot = false;
+
         synchronized (hM) {
           // Hash and check the html document, and push the Url into the queue,
           // if the doc is new.
           if (hM.HashAndCheckDoc(nUrl.getUrlString(), doc)) {
+            insertOrNot = true;
+
             synchronized (qM) {
               qM.push(nUrl);
               qM.moveToDomainQ();
             }
-            // FIXME: amir-kedis: Akram, Review/Refactor this part please
-            synchronized (db) {
-              db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
-                                nUrl.getDomainName(), doc);
-              System.out.println(ANSI_CYAN + "|| Inserted " +
-                                 nUrl.getUrlString() + " into the database ||");
-            }
+
             finalUrls.add(nUrl);
           }
         }
-        // System.out.println(nUrl.getUrlString()); // TOBE removed
+
+        // check if the url & its doc needs to be put into the database.
+        if (insertOrNot) {
+          synchronized (db) {
+            db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
+                              nUrl.getDomainName(), doc);
+            System.out.println(ANSI_CYAN + "|| Inserted " +
+                               nUrl.getUrlString() + " into the database ||");
+          }
+        }
       }
     }
 
@@ -73,7 +80,6 @@ public class Crawler implements Runnable {
     int i = 0;
     while (i < depth) {
       Url url = null;
-      System.out.println(qM.isEmpty());
 
       // Get the top Url from the queue.
       synchronized (qM) {
@@ -82,17 +88,10 @@ public class Crawler implements Runnable {
           System.out.println("|| Popped " + url.getUrlString() + " ||");
         } catch (Exception e) {
           System.out.println("Queue is empty");
+          continue;
         }
       }
 
-      // TODO: save the document to the database.
-      final String ANSI_CYAN = "\u001B[36m";
-      synchronized (db) {
-        db.insertDocument(url.getUrlString(), url.getTitle(),
-                          url.getDomainName(), url.GetDocument().outerHtml());
-        System.out.println(ANSI_CYAN + "|| Inserted " + url.getUrlString() +
-                           " into the database ||");
-      }
       // TODO: handle that the number of crawled urls doesn't exceed 6000.
 
       // Extract Urls and handle them, hash and check that they was not crawled
@@ -102,14 +101,6 @@ public class Crawler implements Runnable {
           urlH.HandleURLs(url.GetDocument(), url.getUrlString());
 
       List<Url> urls = HandleHashing(extractedUrls);
-      //
-      // synchronized (db) {
-      // for (Url u : urls) {
-      // db.insertDocument(u.getUrlString(), u.getTitle(), u.getDomainName(),
-      // u.GetDocument().body().text());
-      // System.out.println(ANSI_CYAN + "|| Inserted " + u.getUrlString() +
-      // " into the database ||");
-      // }
 
       i++;
     }
