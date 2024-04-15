@@ -42,6 +42,7 @@ public class Url {
       this.htmlDoc = Jsoup.connect(this.urlString).get();
       return true;
     } catch (Exception e) {
+      System.out.println("Couldn't fetch docuemnt of url: " + getUrlString());
       return false;
     }
   }

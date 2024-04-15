@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import org.jsoup.Connection;
+import org.jsoup.Connection.Response;
+import org.jsoup.Jsoup;
 
 public class Main {
   public static void main(String[] args) {
@@ -13,6 +17,22 @@ public class Main {
     // testing
     // TODO: chagnge this seed to be writeen from a file and the number of
     // threads to be inputed
+
+    /*
+     * URLsHandler urlH = new URLsHandler();
+     *
+     * Url url = new Url("https://about.fandom.com/mediakit/", 1);
+     * url.FillDocument();
+     * Set<String> s = urlH.HandleURLs(url.GetDocument(), url.getUrlString());
+     * for (String u : s) {
+     * System.out.println(u);
+     * }
+     * System.out.println("----------------------------------------------------");
+     * List<Url> l = Crawler.HandleHashing(s);
+     * for (Url u : l) {
+     * System.out.println(u.getUrlString());
+     * }
+     */
 
     List<Url> urls = new ArrayList<>();
 
@@ -34,7 +54,7 @@ public class Main {
     Crawler.ProvideSeed(urls);
 
     List<Thread> threads = new ArrayList<>();
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
       Thread t = new Thread(new Crawler());
       threads.add(t);
       t.start();

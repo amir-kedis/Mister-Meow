@@ -28,8 +28,13 @@ public class URLsHandler {
       urls.add(link.attr("href"));
     }
 
-    // Call a private function to normalize the urls.
-    urls = NormalizeURLs(urls, baseURL);
+    try {
+      // Call a private function to normalize the urls.
+      urls = NormalizeURLs(urls, baseURL);
+    } catch (Exception e) {
+      System.out.println(e);
+      return urls;
+    }
 
     RobotsManager robotsM = new RobotsManager();
     urls = robotsM.ExcludeRobotsURLs(urls, baseURL);
