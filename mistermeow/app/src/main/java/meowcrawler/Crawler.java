@@ -36,6 +36,15 @@ public class Crawler implements Runnable {
 
       // Fetch the document of the url, then hash and check it.
       if (nUrl.FillDocument()) {
+
+        // Make sure that we are crawling english websites only.
+        String docLang = nUrl.GetDocument().select("html").attr("lang");
+
+        if (docLang != null && !docLang.contains("en") &&
+            !docLang.contains("ar")) {
+          continue;
+        }
+
         // Get the text from the html document.
         String doc = nUrl.GetDocument().outerHtml();
         boolean insertOrNot = false;

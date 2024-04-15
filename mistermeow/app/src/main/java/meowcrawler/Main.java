@@ -10,6 +10,9 @@ import java.util.Set;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class Main {
   public static void main(String[] args) {
@@ -68,6 +71,7 @@ public class Main {
     } catch (Exception e) {
       System.out.println(e);
     }
+
     /*
      * URLsHandler urlEx = new URLsHandler();
      * String baseURL = "https://en.wikipedia.org";
