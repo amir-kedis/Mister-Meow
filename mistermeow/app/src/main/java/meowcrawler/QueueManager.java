@@ -25,7 +25,7 @@ public class QueueManager {
 
   public boolean push(Url newUrl) {
     if (priorityQ.add(newUrl)) {
-      System.out.println("Inserted Into Queue Sucessfully");
+      // System.out.println("Inserted Into Queue Sucessfully");
       return true;
     }
     System.out.println("Error in insertion into Queue");
@@ -90,7 +90,7 @@ public class QueueManager {
     }
     Queue<Url> l = new LinkedList<Url>();
     domainQs.add(l);
-    System.out.println("New domain queue has been formed");
+    // System.out.println("New domain queue has been formed");
     domainQListSize++;
     domainIndexMp.put(domain, l);
     return l;

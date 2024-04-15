@@ -10,6 +10,7 @@ public class Crawler implements Runnable {
   static private HashingManager hM = new HashingManager();
   static private QueueManager qM = new QueueManager();
   static private DBManager db = new DBManager();
+  static private int countOfDocumentsCrawled = 0;
 
   /**
    * HandleHashing - takes a set of urls and hash and check that they were not
@@ -18,7 +19,7 @@ public class Crawler implements Runnable {
    * @param urls - the set of urls extracted from the html document.
    * @return list of unique urls that were not crawled before.
    */
-  static public List<Url> HandleHashing(Set<String> urls) {
+  public List<Url> HandleHashing(Set<String> urls) {
     List<Url> finalUrls = new ArrayList<>();
     final String ANSI_CYAN = "\u001B[36m";
 
@@ -60,7 +61,9 @@ public class Crawler implements Runnable {
             db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
                               nUrl.getDomainName(), doc);
             System.out.println(ANSI_CYAN + "|| Inserted " +
-                               nUrl.getUrlString() + " into the database ||");
+                               nUrl.getUrlString() + " into the database"
+                               + " Count: " + ++countOfDocumentsCrawled +
+                               " ||");
           }
         }
       }
@@ -76,9 +79,7 @@ public class Crawler implements Runnable {
    * @return void.
    */
   public void run() {
-    final int depth = 3;
-    int i = 0;
-    while (i < depth) {
+    while (countOfDocumentsCrawled < 2000) {
       Url url = null;
 
       // Get the top Url from the queue.
@@ -101,8 +102,6 @@ public class Crawler implements Runnable {
           urlH.HandleURLs(url.GetDocument(), url.getUrlString());
 
       List<Url> urls = HandleHashing(extractedUrls);
-
-      i++;
     }
   }
 
@@ -114,6 +113,7 @@ public class Crawler implements Runnable {
     // this please.
     Set<String> seeds =
         urls.stream().map(Url::getUrlString).collect(Collectors.toSet());
-    HandleHashing(seeds);
+    Crawler c = new Crawler();
+    c.HandleHashing(seeds);
   }
 }

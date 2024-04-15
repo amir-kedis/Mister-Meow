@@ -25,6 +25,10 @@ public class RobotsManager {
 
     // Fetch robots file as a document, then extract disallowed urls from it.
     Document robotsDoc = FetchRobots(baseUrlStr);
+    if (robotsDoc == null) {
+      return newUrlsList;
+    }
+
     Set<String> ExcludedUrls = ExtractDisallowedURLs(robotsDoc);
 
     // For each url in the urls list, if it contains any url from the robots
