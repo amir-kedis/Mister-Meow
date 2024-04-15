@@ -1,7 +1,9 @@
 package meowcrawler;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,6 +11,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 public class RobotsManager {
+
+  static private Map<String, Set<String>> storedRobots = new HashMap<>();
 
   /*
    * Takes a list of urls and a base url, excludes any url ,that is in the
@@ -22,14 +26,15 @@ public class RobotsManager {
    */
   public Set<String> ExcludeRobotsURLs(Set<String> urls, String baseUrlStr) {
     Set<String> newUrlsList = new HashSet<>();
+    Set<String> ExcludedUrls = null;
 
-    // Fetch robots file as a document, then extract disallowed urls from it.
-    Document robotsDoc = FetchRobots(baseUrlStr);
-    if (robotsDoc == null) {
+    // Convert the baseUrlStr into a URI object.
+    URI baseUrl = URI.create(baseUrlStr);
+
+    ExcludedUrls = checkAndFetchExcluded(baseUrl);
+    if (ExcludedUrls == null) {
       return newUrlsList;
     }
-
-    Set<String> ExcludedUrls = ExtractDisallowedURLs(robotsDoc);
 
     // For each url in the urls list, if it contains any url from the robots
     // file, exclude it.
@@ -53,20 +58,56 @@ public class RobotsManager {
   }
 
   /**
-   * It takes a base URL as a string and fetches the robots.txt file for the
+   * Takes a baseUrl and check if, for its host name, the robot file was
+   * fetched before or not, and fetch it if it wasn't.
+   *
+   * @param baseUrl: the baseUrl from which we would get the hostname.
+   * @return Set of excluded urls.
+   */
+  private Set<String> checkAndFetchExcluded(URI baseUrl) {
+    Set<String> ExcludedUrls = null;
+    boolean isFetched = false;
+
+    synchronized (storedRobots) {
+      isFetched = storedRobots.containsKey(baseUrl.getHost());
+    }
+
+    // Store each excluded urls with their hostname, to not fetch them again.
+    if (!isFetched) {
+      // Fetch robots file as a document, then extract disallowed urls from it.
+      Document robotsDoc = FetchRobots(baseUrl);
+      if (robotsDoc == null) {
+        return null;
+      }
+
+      ExcludedUrls = ExtractDisallowedURLs(robotsDoc);
+
+      synchronized (storedRobots) {
+        storedRobots.put(baseUrl.getHost(), ExcludedUrls);
+      }
+
+    } else {
+      synchronized (storedRobots) {
+        ExcludedUrls = storedRobots.get(baseUrl.getHost());
+      }
+    }
+
+    return ExcludedUrls;
+  }
+
+  /**
+   * It takes a base URL as a URI and fetches the robots.txt file for the
    * website
    * if it exists.
    *
-   * @param baseUrlStr: the base url as a string to fetch from the robots.txt
+   * @param baseUrl: the base url as a URI to fetch from the robots.txt
    * @return the robots file as a Document.
    */
-  public Document FetchRobots(String baseUrlStr) {
-    // Convert the baseUrlStr into a URI object.
-    URI baseUrl = URI.create(baseUrlStr);
+  public Document FetchRobots(URI baseUrl) {
 
     // Get the robots.txt file of the website, using the hostname.
     String robotsURL =
-        baseUrl.getScheme() + "://" + baseUrl.getAuthority() + "/robots.txt";
+        baseUrl.getScheme() + "://" + baseUrl.getHost() + "/robots.txt";
 
     Document robotsFile = null;
 
