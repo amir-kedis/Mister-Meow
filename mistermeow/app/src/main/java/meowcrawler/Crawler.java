@@ -23,21 +23,17 @@ public class Crawler implements Runnable {
     final String ANSI_CYAN = "\u001B[36m";
 
     for (String url : urls) {
-      String hashedUrl = null;
-      String hashedDoc = null;
+      // Create a Url object for the url string.
+      Url nUrl = new Url(url, 1);
 
       // Hash and check if the url was not crawled (store it if it wasn't)
       synchronized (hM) {
-        hashedUrl = hM.HashAndCheckURL(url);
+        String hashedUrl = hM.HashAndCheckURL(nUrl);
         if (hashedUrl == null) {
-          continue;
-        } else {
           synchronized (db) { db.incrementPopularity("URL", url); }
+          continue;
         }
       }
-
-      // Create a Url object for the url string.
-      Url nUrl = new Url(url, 1);
 
       // Fetch the document of the url, then hash and check it.
       if (nUrl.FillDocument()) {
@@ -56,7 +52,7 @@ public class Crawler implements Runnable {
 
         synchronized (hM) {
           // Hash and check the html document, and push the Url into the queue.
-          hashedDoc = hM.HashAndCheckDoc(nUrl.getUrlString(), doc);
+          String hashedDoc = hM.HashAndCheckDoc(nUrl, doc);
 
           if (hashedDoc != null) {
             insertOrNot = true;
@@ -72,14 +68,17 @@ public class Crawler implements Runnable {
         if (insertOrNot) {
           synchronized (db) {
             db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
-                              nUrl.getDomainName(), doc, hashedUrl, hashedDoc);
+                              nUrl.getDomainName(), doc, nUrl.getHashedURL(),
+                              nUrl.getHashedDoc());
             System.out.println(ANSI_CYAN + "|| Inserted " +
                                nUrl.getUrlString() + " into the database"
                                + " Count: " + ++countOfDocumentsCrawled +
                                " ||");
           }
         } else {
-          synchronized (db) { db.incrementPopularity("hashedDoc", hashedDoc); }
+          synchronized (db) {
+            db.incrementPopularity("hashedDoc", nUrl.getHashedDoc());
+          }
         }
       }
     }

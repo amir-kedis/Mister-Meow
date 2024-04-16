@@ -36,8 +36,9 @@ public class HashingManager {
    * @return String - returns the hashed url if it wasn't hashed before, else
    *         returns null.
    */
-  public String HashAndCheckURL(String url) {
-    String hashedURL = this.HashFunction(url);
+  public String HashAndCheckURL(Url url) {
+    String hashedURL = this.HashFunction(url.getUrlString());
+    url.setHashedURL(hashedURL);
 
     if (!this.HashedURLs.contains(hashedURL)) {
       HashedURLs.add(hashedURL);
@@ -55,14 +56,15 @@ public class HashingManager {
    *            hashed.
    * @param doc - the html doc represented in a string to hash and check on.
    * @return String - returns the hashed document if it wasn't hashed before,
-   *     else
+   *         else
    *         returns null.
    */
-  public String HashAndCheckDoc(String url, String doc) {
+  public String HashAndCheckDoc(Url url, String doc) {
     String hashedDoc = this.HashFunction(doc);
+    url.setHashedDoc(hashedDoc);
 
     if (!this.HashedDocs.containsKey(hashedDoc)) {
-      HashedDocs.put(hashedDoc, url);
+      HashedDocs.put(hashedDoc, url.getUrlString());
       return hashedDoc;
     }
     return null;
