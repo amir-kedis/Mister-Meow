@@ -36,16 +36,17 @@ public class DBManager {
   }
 
   /**
-   * takes a url and increments the popularity of it.
+   * takes a value of a certain key and increments the popularity of it.
    *
-   * @param url - the url to increment the document for.
+   * @param key   - the key to search on.
+   * @param value - the value to match.
    * @return boolean - indicating if the popularity incremented successfuly or
    *         not.
    */
-  public boolean incrementPopularity(String url) {
+  public boolean incrementPopularity(String key, String value) {
     try {
-      // Build a filter to find the document with the specified URL
-      Document filter = new Document("URL", url);
+      // Build a filter to find the document with the specified key & value.
+      Document filter = new Document(key, value);
 
       // Update by incrementing the "popularity" field (atomic operation)
       Document update = new Document("$inc", new Document("popularity", 1));

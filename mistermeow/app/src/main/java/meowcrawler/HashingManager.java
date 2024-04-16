@@ -33,17 +33,17 @@ public class HashingManager {
    * Takes a url and hash it then check if it is in the HashedURLs or not.
    *
    * @param url - the url to hash and check on.
-   * @return boolean - true if the url doesn't exist in HashedURLs, false if it
-   *         exists.
+   * @return String - returns the hashed url if it wasn't hashed before, else
+   *         returns null.
    */
-  public boolean HashAndCheckURL(String url) {
+  public String HashAndCheckURL(String url) {
     String hashedURL = this.HashFunction(url);
 
     if (!this.HashedURLs.contains(hashedURL)) {
       HashedURLs.add(hashedURL);
-      return true;
+      return hashedURL;
     }
-    return false;
+    return null;
   }
 
   /**
@@ -54,16 +54,17 @@ public class HashingManager {
    *            isn't
    *            hashed.
    * @param doc - the html doc represented in a string to hash and check on.
-   * @return boolean - true if the doc doesn't exist in HashedDocs, false if it
-   *         exists.
+   * @return String - returns the hashed document if it wasn't hashed before,
+   *     else
+   *         returns null.
    */
-  public boolean HashAndCheckDoc(String url, String doc) {
+  public String HashAndCheckDoc(String url, String doc) {
     String hashedDoc = this.HashFunction(doc);
 
     if (!this.HashedDocs.containsKey(hashedDoc)) {
       HashedDocs.put(hashedDoc, url);
-      return true;
+      return hashedDoc;
     }
-    return false;
+    return null;
   }
 }

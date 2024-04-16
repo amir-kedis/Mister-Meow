@@ -17,17 +17,22 @@ public class Crawler implements Runnable {
    * crawled before.
    *
    * @param urls - the set of urls extracted from the html document.
-   * @return list of unique urls that were not crawled before.
+   * @return void.
    */
-  public List<Url> HandleHashing(Set<String> urls) {
-    List<Url> finalUrls = new ArrayList<>();
+  public void HandleHashing(Set<String> urls) {
     final String ANSI_CYAN = "\u001B[36m";
 
     for (String url : urls) {
+      String hashedUrl = null;
+      String hashedDoc = null;
+
       // Hash and check if the url was not crawled (store it if it wasn't)
       synchronized (hM) {
-        if (!hM.HashAndCheckURL(url)) {
+        hashedUrl = hM.HashAndCheckURL(url);
+        if (hashedUrl == null) {
           continue;
+        } else {
+          synchronized (db) { db.incrementPopularity("URL", url); }
         }
       }
 
@@ -50,17 +55,16 @@ public class Crawler implements Runnable {
         boolean insertOrNot = false;
 
         synchronized (hM) {
-          // Hash and check the html document, and push the Url into the queue,
-          // if the doc is new.
-          if (hM.HashAndCheckDoc(nUrl.getUrlString(), doc)) {
+          // Hash and check the html document, and push the Url into the queue.
+          hashedDoc = hM.HashAndCheckDoc(nUrl.getUrlString(), doc);
+
+          if (hashedDoc != null) {
             insertOrNot = true;
 
             synchronized (qM) {
               qM.push(nUrl);
               qM.moveToDomainQ();
             }
-
-            finalUrls.add(nUrl);
           }
         }
 
@@ -68,17 +72,17 @@ public class Crawler implements Runnable {
         if (insertOrNot) {
           synchronized (db) {
             db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
-                              nUrl.getDomainName(), doc);
+                              nUrl.getDomainName(), doc, hashedUrl, hashedDoc);
             System.out.println(ANSI_CYAN + "|| Inserted " +
                                nUrl.getUrlString() + " into the database"
                                + " Count: " + ++countOfDocumentsCrawled +
                                " ||");
           }
+        } else {
+          synchronized (db) { db.incrementPopularity("hashedDoc", hashedDoc); }
         }
       }
     }
-
-    return finalUrls;
   }
 
   /**
@@ -110,7 +114,7 @@ public class Crawler implements Runnable {
       Set<String> extractedUrls =
           urlH.HandleURLs(url.GetDocument(), url.getUrlString());
 
-      List<Url> urls = HandleHashing(extractedUrls);
+      HandleHashing(extractedUrls);
     }
   }
 
