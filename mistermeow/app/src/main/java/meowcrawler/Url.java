@@ -9,12 +9,46 @@ public class Url {
   private Document htmlDoc;
   private int priority;
   private static final int minPriority = 3;
+  private String hashedURL;
+  private String hashedDoc;
 
   public Url(String s, int p) {
     this.urlString = s;
     this.priority = p;
-    htmlDoc = null;
+    this.htmlDoc = null;
+    this.hashedURL = null;
+    this.hashedDoc = null;
   }
+
+  /**
+   * Setter for the hashedURL data member.
+   *
+   * @param value - the value to set with.
+   * @return void.
+   */
+  public void setHashedURL(String value) { this.hashedURL = value; }
+
+  /**
+   * Setter for the hashedDoc data member.
+   *
+   * @param value - the value to set with.
+   * @return void.
+   */
+  public void setHashedDoc(String value) { this.hashedDoc = value; }
+
+  /**
+   * Getter for the hashedURL data member.
+   *
+   * @return hashedURL.
+   */
+  public String getHashedURL() { return this.hashedURL; }
+
+  /**
+   * Getter for the hashedDoc data member.
+   *
+   * @return hashedDoc.
+   */
+  public String getHashedDoc() { return this.hashedDoc; }
 
   /**
    * Setter for the htmlDoc data member.
