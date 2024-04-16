@@ -12,8 +12,9 @@ public class Main {
     DBManager dbManager = new DBManager();
 
     // Test inserting a document
-    String docId = dbManager.insertDocument("http://example.com", "Title",
-                                            "example.com", "Content");
+    String docId =
+        dbManager.insertDocument("http://example.com", "Title", "example.com",
+                                 "Content", "asdflkasd", "asdfklsdflceww");
     System.out.println("Inserted document ID: " + docId);
 
     // Test getting a document
