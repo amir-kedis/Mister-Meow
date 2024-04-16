@@ -13,6 +13,93 @@ public class Crawler implements Runnable {
   static private int countOfDocumentsCrawled = 0;
 
   /**
+   * handleHashingURL - takes a Url, hash and check it.
+   *
+   * @param nUrl - the Url to handle.
+   * @return boolean - true if url is new (not crawled before), else return
+   *         false.
+   */
+  private boolean handleHashingURL(Url nUrl) {
+    // Hash and check if the url was not crawled (store it if it wasn't)
+    synchronized (hM) {
+      String hashedUrl = hM.HashAndCheckURL(nUrl);
+      if (hashedUrl == null) {
+        synchronized (db) {
+          db.incrementPopularity("URL", nUrl.getUrlString());
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * handleHashingDoc - takes a nUrl and handles its document fetching, hashing
+   * and insertion into DB.
+   *
+   * @param nUrl - the given url.
+   * @return void.
+   */
+  private void handleHashingDoc(Url nUrl) {
+    // Make sure that we are crawling english websites only.
+    String docLang = nUrl.GetDocument().select("html").attr("lang");
+    boolean insertOrNot = false;
+
+    if (docLang != null && !docLang.contains("en") && !docLang.contains("ar")) {
+      return;
+    }
+
+    // Get the text from the html document.
+    String doc = nUrl.GetDocument().outerHtml();
+
+    synchronized (hM) {
+      // Hash and check the html document, and push the Url into the queue.
+      String hashedDoc = hM.HashAndCheckDoc(nUrl, doc);
+
+      if (hashedDoc != null) {
+        insertOrNot = true;
+        synchronized (qM) {
+          qM.push(nUrl);
+          qM.moveToDomainQ();
+        }
+      }
+    }
+
+    this.handleInsertionIntoDB(insertOrNot, nUrl, doc);
+  }
+
+  /**
+   * handleInsertionIntoDB - determines if the Url should be inserted into DB or
+   * increment its popularity.
+   *
+   * @param insertOrNot - boolean to indicate if we should insert or increment
+   *                    popularity.
+   * @param nUrl        - the nUrl from which we would get its related data.
+   * @param doc         - outerHtml document of the url.
+   * @return void.
+   */
+  private void handleInsertionIntoDB(boolean insertOrNot, Url nUrl,
+                                     String doc) {
+    final String ANSI_CYAN = "\u001B[36m";
+
+    // check if the url & its doc needs to be put into the database.
+    if (insertOrNot) {
+      synchronized (db) {
+        db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
+                          nUrl.getDomainName(), doc, nUrl.getHashedURL(),
+                          nUrl.getHashedDoc());
+        System.out.println(ANSI_CYAN + "|| Inserted " + nUrl.getUrlString() +
+                           " into the database"
+                           + " Count: " + ++countOfDocumentsCrawled + " ||");
+      }
+    } else {
+      synchronized (db) {
+        db.incrementPopularity("hashedDoc", nUrl.getHashedDoc());
+      }
+    }
+  }
+
+  /**
    * HandleHashing - takes a set of urls and hash and check that they were not
    * crawled before.
    *
@@ -20,66 +107,17 @@ public class Crawler implements Runnable {
    * @return void.
    */
   public void HandleHashing(Set<String> urls) {
-    final String ANSI_CYAN = "\u001B[36m";
-
     for (String url : urls) {
       // Create a Url object for the url string.
       Url nUrl = new Url(url, 1);
 
-      // Hash and check if the url was not crawled (store it if it wasn't)
-      synchronized (hM) {
-        String hashedUrl = hM.HashAndCheckURL(nUrl);
-        if (hashedUrl == null) {
-          synchronized (db) { db.incrementPopularity("URL", url); }
-          continue;
-        }
+      if (!this.handleHashingURL(nUrl)) {
+        continue;
       }
 
       // Fetch the document of the url, then hash and check it.
       if (nUrl.FillDocument()) {
-
-        // Make sure that we are crawling english websites only.
-        String docLang = nUrl.GetDocument().select("html").attr("lang");
-
-        if (docLang != null && !docLang.contains("en") &&
-            !docLang.contains("ar")) {
-          continue;
-        }
-
-        // Get the text from the html document.
-        String doc = nUrl.GetDocument().outerHtml();
-        boolean insertOrNot = false;
-
-        synchronized (hM) {
-          // Hash and check the html document, and push the Url into the queue.
-          String hashedDoc = hM.HashAndCheckDoc(nUrl, doc);
-
-          if (hashedDoc != null) {
-            insertOrNot = true;
-
-            synchronized (qM) {
-              qM.push(nUrl);
-              qM.moveToDomainQ();
-            }
-          }
-        }
-
-        // check if the url & its doc needs to be put into the database.
-        if (insertOrNot) {
-          synchronized (db) {
-            db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
-                              nUrl.getDomainName(), doc, nUrl.getHashedURL(),
-                              nUrl.getHashedDoc());
-            System.out.println(ANSI_CYAN + "|| Inserted " +
-                               nUrl.getUrlString() + " into the database"
-                               + " Count: " + ++countOfDocumentsCrawled +
-                               " ||");
-          }
-        } else {
-          synchronized (db) {
-            db.incrementPopularity("hashedDoc", nUrl.getHashedDoc());
-          }
-        }
+        this.handleHashingDoc(nUrl);
       }
     }
   }
@@ -105,8 +143,6 @@ public class Crawler implements Runnable {
         }
       }
 
-      // TODO: handle that the number of crawled urls doesn't exceed 6000.
-
       // Extract Urls and handle them, hash and check that they was not crawled
       // before
       URLsHandler urlH = new URLsHandler();
@@ -121,8 +157,6 @@ public class Crawler implements Runnable {
    * A static function that provides initial seed for the queueManager.
    */
   static public void ProvideSeed(List<Url> urls) {
-    // FIXME: amir-kedis: Akram, What I did is probably wrong, Review/Refactor
-    // this please.
     Set<String> seeds =
         urls.stream().map(Url::getUrlString).collect(Collectors.toSet());
     Crawler c = new Crawler();
