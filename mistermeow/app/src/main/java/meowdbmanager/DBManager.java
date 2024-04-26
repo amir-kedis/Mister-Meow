@@ -1,6 +1,7 @@
 package meowdbmanager;
 
 import com.mongodb.MongoException;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -13,6 +14,7 @@ import java.net.*;
 import java.util.*;
 import meowindexer.Tokenizer.*;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 public class DBManager {
@@ -33,6 +35,33 @@ public class DBManager {
     invertedCollection = DB.getCollection("InvertedIndex");
     docCollection = DB.getCollection("Documents");
     invertedCollection.createIndex(new Document("token", 1));
+  }
+
+  /**
+   * retrieveUrlsInQueue - gets any url that was in the queue when crawler
+   * stopped.
+   *
+   * @return List<Document> - a list of documents (urls) that were in the queue.
+   */
+  public List<Document> retrieveUrlsInQueue() {
+    try {
+      // Create a filter document to find documents with isInQueue = true
+      Bson filter = Filters.eq("isInQueue", true);
+
+      // Find documents matching the filter in the docCollection
+      FindIterable<Document> matchingUrls = docCollection.find(filter);
+
+      // Convert the FindIterable to a list (may not be suitable for very large
+      // datasets)
+      List<Document> urlList =
+          (List<Document>)matchingUrls.into(new ArrayList<Document>());
+
+      return urlList;
+
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      return new ArrayList<>();
+    }
   }
 
   /**
