@@ -36,6 +36,34 @@ public class DBManager {
   }
 
   /**
+   * updateInQueue - takes a url and updates its inQueue state by a boolean.
+   *
+   * @param url       - the url of the website.
+   * @param isInQueue - the state of the url.
+   * @return boolean - indicating if the update operation worked or not.
+   */
+  public boolean updateInQueue(String url, boolean isInQueue) {
+    try {
+      // Build a filter to find the document with the specified key & value.
+      Document filter = new Document("URL", url);
+
+      // Create an update document to set the "isInQueue" field
+      Document update = new Document();
+      update.put("inQueue", isInQueue);
+
+      // Update the document, returning true if successful
+      UpdateResult updateResult = docCollection.updateOne(filter, update);
+      return updateResult.getModifiedCount() == 1;
+
+    } catch (MongoException e) {
+      System.out.println(
+          "Error while updating the inQueue state of the url.\n" +
+          e.getMessage());
+      return false;
+    }
+  }
+
+  /**
    * takes a value of a certain key and increments the popularity of it.
    *
    * @param key   - the key to search on.
@@ -76,7 +104,8 @@ public class DBManager {
                               .append("hashedURL", hashedUrl)
                               .append("hashedDoc", hashedDoc)
                               .append("popularity", 1)
-                              .append("indexed", false);
+                              .append("indexed", false)
+                              .append("inQueue", true);
 
       String insertedId = docCollection.insertOne(document)
                               .getInsertedId()
