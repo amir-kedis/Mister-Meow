@@ -143,6 +143,12 @@ public class Crawler implements Runnable {
         }
       }
 
+      synchronized (db) {
+        if (!db.updateInQueue(url.getUrlString(), false)) {
+          System.out.println("Couldn't update the inQueue field of the url");
+        }
+      }
+
       // Extract Urls and handle them, hash and check that they was not crawled
       // before
       URLsHandler urlH = new URLsHandler();
