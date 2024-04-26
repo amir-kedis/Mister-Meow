@@ -1,5 +1,7 @@
 package meowdbmanager;
 
+import static com.mongodb.client.model.Projections.*;
+
 import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
@@ -35,6 +37,38 @@ public class DBManager {
     invertedCollection = DB.getCollection("InvertedIndex");
     docCollection = DB.getCollection("Documents");
     invertedCollection.createIndex(new Document("token", 1));
+  }
+
+  /**
+   * retrieveHashedDataOfUrls - returns the hashedUrl, hashedDoc and URL of each
+   * url stored in the database.
+   *
+   * @return List<Document> - a list of documents (urls) that are in the queue.
+   */
+  public List<Document> retrieveHashedDataOfUrls() {
+    try {
+      // Empty filter.
+      Bson filter = Filters.empty();
+
+      // Create a projection document to specify fields to retrieve
+      Bson projection =
+          fields(include("hashedURL", "hashedDoc", "URL"), excludeId());
+
+      // Find documents matching the filter in the docCollection
+      FindIterable<Document> matchingUrls =
+          docCollection.find(filter).projection(projection);
+
+      // Convert the FindIterable to a list (may not be suitable for very large
+      // datasets)
+      List<Document> urlsList =
+          (List<Document>)matchingUrls.into(new ArrayList<Document>());
+
+      return urlsList;
+
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      return new ArrayList<>();
+    }
   }
 
   /**
