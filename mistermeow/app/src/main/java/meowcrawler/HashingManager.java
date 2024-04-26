@@ -2,9 +2,11 @@ package meowcrawler;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.bson.Document;
 
 public class HashingManager {
   private Set<String> HashedURLs;
@@ -68,5 +70,42 @@ public class HashingManager {
       return hashedDoc;
     }
     return null;
+  }
+
+  /**
+   * fillHashedURLs - takes a list of hashed URLS and fill the hashedURLs set
+   * with it.
+   *
+   * @param List<Document> - the list of Documents which contains the
+   *                       hashedURLs.
+   * @return void.
+   */
+  public void fillHashedURLs(List<Document> urlsData) {
+    for (Document urlData : urlsData) {
+      String hashedURL = urlData.getString("hashedURL");
+
+      if (!this.HashedURLs.contains(hashedURL)) {
+        this.HashedURLs.add(hashedURL);
+      }
+    }
+  }
+
+  /**
+   * fillHashedDocs - takes a list of urls data and fill the hashedDocs map
+   * with it.
+   *
+   * @param List<Document> - the list of Documents which contains the
+   *                       hashedDocs.
+   * @return void.
+   */
+  public void fillHashedDocs(List<Document> urlsData) {
+    for (Document urlData : urlsData) {
+      String hashedDoc = urlData.getString("hashedDoc");
+      String url = urlData.getString("URL");
+
+      if (!this.HashedDocs.containsKey(hashedDoc)) {
+        HashedDocs.put(hashedDoc, url);
+      }
+    }
   }
 }
