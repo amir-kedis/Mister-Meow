@@ -112,7 +112,7 @@ public class DBManager {
 
       // Create an update document to set the "isInQueue" field
       Document update = new Document();
-      update.put("inQueue", isInQueue);
+      update.append("$set", new Document("inQueue", isInQueue));
 
       // Update the document, returning true if successful
       UpdateResult updateResult = docCollection.updateOne(filter, update);
