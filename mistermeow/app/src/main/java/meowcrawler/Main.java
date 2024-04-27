@@ -54,6 +54,9 @@ public class Main {
       e.printStackTrace();
     }
 
+    Crawler.loadHashedData();
+    Crawler.loadQueueData();
+
     Crawler.ProvideSeed(urls);
 
     List<Thread> threads = new ArrayList<>();

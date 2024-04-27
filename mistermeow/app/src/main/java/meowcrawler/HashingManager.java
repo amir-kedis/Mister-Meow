@@ -88,6 +88,8 @@ public class HashingManager {
         this.HashedURLs.add(hashedURL);
       }
     }
+    System.out.println("count of urls added to hashed urls: " +
+                       HashedURLs.size());
   }
 
   /**
@@ -107,5 +109,7 @@ public class HashingManager {
         HashedDocs.put(hashedDoc, url);
       }
     }
+    System.out.println("count of urls added to hashed docs: " +
+                       HashedDocs.size());
   }
 }

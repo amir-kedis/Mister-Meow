@@ -80,7 +80,7 @@ public class DBManager {
   public List<Document> retrieveUrlsInQueue() {
     try {
       // Create a filter document to find documents with isInQueue = true
-      Bson filter = Filters.eq("isInQueue", true);
+      Bson filter = Filters.eq("inQueue", true);
 
       // Find documents matching the filter in the docCollection
       FindIterable<Document> matchingUrls = docCollection.find(filter);
