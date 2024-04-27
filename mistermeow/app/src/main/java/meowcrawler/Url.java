@@ -6,7 +6,6 @@ import org.jsoup.nodes.Document;
 
 public class Url {
   private String urlString;
-  private Document htmlDoc;
   private int priority;
   private static final int minPriority = 3;
   private String hashedURL;
@@ -15,7 +14,6 @@ public class Url {
   public Url(String s, int p) {
     this.urlString = s;
     this.priority = p;
-    this.htmlDoc = null;
     this.hashedURL = null;
     this.hashedDoc = null;
   }
@@ -51,34 +49,20 @@ public class Url {
   public String getHashedDoc() { return this.hashedDoc; }
 
   /**
-   * Setter for the htmlDoc data member.
+   * Fetches the htmlDoc of the URL with the urlString datamember and returns
+   * it.
    *
-   * @param doc - the html document to set with.
-   * @return void.
+   * @return the fetched Document.
    */
-  public void SetDocument(Document doc) { this.htmlDoc = doc; }
-
-  /**
-   * Getter for the htmlDoc data member.
-   *
-   * @return htmlDoc.
-   */
-  public Document GetDocument() { return this.htmlDoc; }
-
-  /**
-   * Fetches the htmlDoc of the URL with the urlString datamember.
-   *
-   * @return boolean indicating if the fetching process succedded or not.
-   */
-  public boolean FillDocument() {
+  public Document fetchDocument() {
+    Document htmlDoc = null;
     try {
       // Fetche the document.
-      this.htmlDoc = Jsoup.connect(this.urlString).get();
-      return true;
+      htmlDoc = Jsoup.connect(this.urlString).get();
     } catch (Exception e) {
       System.out.println("Couldn't fetch docuemnt of url: " + getUrlString());
-      return false;
     }
+    return htmlDoc;
   }
 
   // Overriding toString fn in Obj class to be able to print correctly
@@ -103,11 +87,4 @@ public class Url {
     // another sol:
     // return this.urlStirng.replaceAll("http(s)?://|www\\.|/.*", "");
   }
-
-  /**
-   * Getter for the title of the html document.
-   *
-   * @return the title of the html document.
-   */
-  public String getTitle() { return this.htmlDoc.title(); }
 }

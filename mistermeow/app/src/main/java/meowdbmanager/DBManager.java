@@ -82,8 +82,13 @@ public class DBManager {
       // Create a filter document to find documents with isInQueue = true
       Bson filter = Filters.eq("inQueue", true);
 
+      // Create a projection document to specify fields to retrieve
+      Bson projection =
+          fields(include("hashedURL", "hashedDoc", "URL"), excludeId());
+
       // Find documents matching the filter in the docCollection
-      FindIterable<Document> matchingUrls = docCollection.find(filter);
+      FindIterable<Document> matchingUrls =
+          docCollection.find(filter).projection(projection);
 
       // Convert the FindIterable to a list (may not be suitable for very large
       // datasets)
@@ -95,6 +100,28 @@ public class DBManager {
     } catch (Exception e) {
       System.out.println(e.getMessage());
       return new ArrayList<>();
+    }
+  }
+
+  /**
+   * getUrlDocument - takes a url and returns its document.
+   *
+   * @param url - the url to search for in the database.
+   * @return its document.
+   */
+  public String getUrlDocument(String url) {
+    try {
+      // Create a filter document to find documents with isInQueue = true
+      Bson filter = Filters.eq("URL", url);
+
+      // Find documents matching the filter in the docCollection
+      FindIterable<Document> matchingUrls = docCollection.find(filter);
+
+      return matchingUrls.first().getString("content");
+
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      return null;
     }
   }
 

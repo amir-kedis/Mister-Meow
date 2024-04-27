@@ -28,6 +28,7 @@ public class HashingManager {
    */
   public String HashFunction(String str) {
     String hashedVal = DigestUtils.md5Hex(str);
+    str = null;
     return hashedVal;
   }
 
@@ -63,6 +64,7 @@ public class HashingManager {
    */
   public String HashAndCheckDoc(Url url, String doc) {
     String hashedDoc = this.HashFunction(doc);
+    doc = null;
     url.setHashedDoc(hashedDoc);
 
     if (!this.HashedDocs.containsKey(hashedDoc)) {

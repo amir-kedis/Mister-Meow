@@ -40,11 +40,12 @@ public class Crawler implements Runnable {
    * and insertion into DB.
    *
    * @param nUrl - the given url.
+   * @param doc  - the html document of the url.
    * @return void.
    */
-  private void handleHashingDoc(Url nUrl) {
+  private void handleHashingDoc(Url nUrl, org.jsoup.nodes.Document doc) {
     // Make sure that we are crawling english websites only.
-    String docLang = nUrl.GetDocument().select("html").attr("lang");
+    String docLang = doc.select("html").attr("lang");
     boolean insertOrNot = false;
 
     if (docLang != null && !docLang.contains("en") && !docLang.contains("ar")) {
@@ -52,11 +53,11 @@ public class Crawler implements Runnable {
     }
 
     // Get the text from the html document.
-    String doc = nUrl.GetDocument().outerHtml();
+    String outerDoc = doc.outerHtml();
 
     synchronized (hM) {
       // Hash and check the html document, and push the Url into the queue.
-      String hashedDoc = hM.HashAndCheckDoc(nUrl, doc);
+      String hashedDoc = hM.HashAndCheckDoc(nUrl, outerDoc);
 
       if (hashedDoc != null) {
         insertOrNot = true;
@@ -67,7 +68,8 @@ public class Crawler implements Runnable {
       }
     }
 
-    this.handleInsertionIntoDB(insertOrNot, nUrl, doc);
+    this.handleInsertionIntoDB(insertOrNot, nUrl, outerDoc, doc.title());
+    outerDoc = null;
   }
 
   /**
@@ -78,18 +80,18 @@ public class Crawler implements Runnable {
    *                    popularity.
    * @param nUrl        - the nUrl from which we would get its related data.
    * @param doc         - outerHtml document of the url.
+   * @param title       - of the document.
    * @return void.
    */
-  private void handleInsertionIntoDB(boolean insertOrNot, Url nUrl,
-                                     String doc) {
+  private void handleInsertionIntoDB(boolean insertOrNot, Url nUrl, String doc,
+                                     String title) {
     final String ANSI_CYAN = "\u001B[36m";
 
     // check if the url & its doc needs to be put into the database.
     if (insertOrNot) {
       synchronized (db) {
-        db.insertDocument(nUrl.getUrlString(), nUrl.getTitle(),
-                          nUrl.getDomainName(), doc, nUrl.getHashedURL(),
-                          nUrl.getHashedDoc());
+        db.insertDocument(nUrl.getUrlString(), title, nUrl.getDomainName(), doc,
+                          nUrl.getHashedURL(), nUrl.getHashedDoc());
         System.out.println(ANSI_CYAN + "|| Inserted " + nUrl.getUrlString() +
                            " into the database"
                            + " Count: " + ++countOfDocumentsCrawled + " ||");
@@ -99,6 +101,8 @@ public class Crawler implements Runnable {
         db.incrementPopularity("hashedDoc", nUrl.getHashedDoc());
       }
     }
+
+    doc = null;
   }
 
   /**
@@ -112,15 +116,20 @@ public class Crawler implements Runnable {
     for (String url : urls) {
       // Create a Url object for the url string.
       Url nUrl = new Url(url, 1);
+      org.jsoup.nodes.Document doc = null;
 
       if (!this.handleHashingURL(nUrl)) {
         continue;
       }
 
       // Fetch the document of the url, then hash and check it.
-      if (nUrl.FillDocument()) {
-        this.handleHashingDoc(nUrl);
+      doc = nUrl.fetchDocument();
+
+      if (doc != null) {
+        this.handleHashingDoc(nUrl, doc);
       }
+
+      doc = null;
     }
   }
 
@@ -133,6 +142,7 @@ public class Crawler implements Runnable {
   public void run() {
     while (countOfDocumentsCrawled < 2000) {
       Url url = null;
+      org.jsoup.nodes.Document doc = null;
 
       // Get the top Url from the queue.
       synchronized (qM) {
@@ -149,15 +159,17 @@ public class Crawler implements Runnable {
         if (!db.updateInQueue(url.getUrlString(), false)) {
           System.out.println("Couldn't update the inQueue field of the url");
         }
+        doc = Jsoup.parse(db.getUrlDocument(url.getUrlString()));
       }
 
       // Extract Urls and handle them, hash and check that they was not crawled
       // before
       URLsHandler urlH = new URLsHandler();
-      Set<String> extractedUrls =
-          urlH.HandleURLs(url.GetDocument(), url.getUrlString());
+      Set<String> extractedUrls = urlH.HandleURLs(doc, url.getUrlString());
 
       HandleHashing(extractedUrls);
+
+      doc = null;
     }
   }
 
@@ -199,7 +211,6 @@ public class Crawler implements Runnable {
 
         url.setHashedDoc(urlData.getString("hashedDoc"));
         url.setHashedURL(urlData.getString("hashedURL"));
-        url.SetDocument(Jsoup.parse(urlData.getString("content")));
 
         synchronized (qM) {
           qM.push(url);
