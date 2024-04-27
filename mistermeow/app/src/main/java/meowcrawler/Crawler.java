@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import meowdbmanager.DBManager;
 import org.bson.Document;
+import org.jsoup.Jsoup;
 
 public class Crawler implements Runnable {
   static private HashingManager hM = new HashingManager();
@@ -52,7 +53,6 @@ public class Crawler implements Runnable {
 
     // Get the text from the html document.
     String doc = nUrl.GetDocument().outerHtml();
-    System.out.println(nUrl.GetDocument().text());
 
     synchronized (hM) {
       // Hash and check the html document, and push the Url into the queue.
@@ -186,12 +186,32 @@ public class Crawler implements Runnable {
    */
   static public void loadQueueData() {
     List<Document> data = null;
+    int count = 0;
 
     synchronized (db) { data = db.retrieveUrlsInQueue(); }
 
+    System.out.println("size of retrieved urls that was in queue: " +
+                       data.size());
+
     for (Document urlData : data) {
-      Url url = new Url(urlData.getString("URL"), 1);
+      try {
+        Url url = new Url(urlData.getString("URL"), 1);
+
+        url.setHashedDoc(urlData.getString("hashedDoc"));
+        url.setHashedURL(urlData.getString("hashedURL"));
+        url.SetDocument(Jsoup.parse(urlData.getString("content")));
+
+        synchronized (qM) {
+          qM.push(url);
+          qM.moveToDomainQ();
+          count++;
+        }
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
+      }
     }
+
+    System.out.println("count of urls added to queue: " + count);
   }
 
   /**
