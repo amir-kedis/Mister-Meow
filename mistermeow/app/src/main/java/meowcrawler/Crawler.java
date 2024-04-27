@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import meowdbmanager.DBManager;
+import org.bson.Document;
 
 public class Crawler implements Runnable {
   static private HashingManager hM = new HashingManager();
@@ -51,6 +52,7 @@ public class Crawler implements Runnable {
 
     // Get the text from the html document.
     String doc = nUrl.GetDocument().outerHtml();
+    System.out.println(nUrl.GetDocument().text());
 
     synchronized (hM) {
       // Hash and check the html document, and push the Url into the queue.
@@ -156,6 +158,39 @@ public class Crawler implements Runnable {
           urlH.HandleURLs(url.GetDocument(), url.getUrlString());
 
       HandleHashing(extractedUrls);
+    }
+  }
+
+  /**
+   * loadHashedData - loads the urls data that was stored in the crawler hashing
+   * manager the last time it crawled, to prevent crawling same pages again.
+   *
+   * @return void.
+   */
+  static public void loadHashedData() {
+    List<Document> urlsData = null;
+
+    synchronized (db) { urlsData = db.retrieveHashedDataOfUrls(); }
+
+    synchronized (hM) {
+      hM.fillHashedURLs(urlsData);
+      hM.fillHashedDocs(urlsData);
+    }
+  }
+
+  /**
+   * loadQueueData - loads the queue data that was stored in the crawler
+   * the last time it crawled, to prevent crawling same pages again.
+   *
+   * @return void.
+   */
+  static public void loadQueueData() {
+    List<Document> data = null;
+
+    synchronized (db) { data = db.retrieveUrlsInQueue(); }
+
+    for (Document urlData : data) {
+      Url url = new Url(urlData.getString("URL"), 1);
     }
   }
 
