@@ -32,7 +32,7 @@ public class URLsHandler {
       // Call a private function to normalize the urls.
       urls = NormalizeURLs(urls, baseURL);
     } catch (Exception e) {
-      System.out.println(e);
+      System.out.println(e.getMessage());
       return urls;
     }
 
@@ -64,25 +64,30 @@ public class URLsHandler {
 
     // Loop over urls to normalize them
     for (String url : urls) {
-      URI newURL = URI.create(url);
-      String normalizedURL = newURL.normalize().toString();
+      try {
+        URI newURL = URI.create(url);
+        String normalizedURL = newURL.normalize().toString();
 
-      // If url not absolute, make it absolute relative to the base url.
-      if (!newURL.isAbsolute()) {
-        if (newURL.toString().startsWith("//")) {
-          normalizedURL = scheme + ":" + newURL.toString();
-        } else if (newURL.toString().startsWith("/")) {
-          normalizedURL = absoluteURL + newURL.toString();
-        } else {
-          normalizedURL = scheme + "://" + newURL.toString();
+        // If url not absolute, make it absolute relative to the base url.
+        if (!newURL.isAbsolute()) {
+          if (newURL.toString().startsWith("//")) {
+            normalizedURL = scheme + ":" + newURL.toString();
+          } else if (newURL.toString().startsWith("/")) {
+            normalizedURL = absoluteURL + newURL.toString();
+          } else {
+            normalizedURL = scheme + "://" + newURL.toString();
+          }
         }
-      }
 
-      if (!normalizedURL.endsWith("/")) {
-        normalizedURL += "/";
+        if (!normalizedURL.endsWith("/")) {
+          normalizedURL += "/";
+        }
+
+        // Add the normalized URL to the Set
+        normalizedURLs.add(normalizedURL);
+      } catch (Exception e) {
+        System.out.println(e.getMessage());
       }
-      // Add the normalized URL to the Set
-      normalizedURLs.add(normalizedURL);
     }
 
     return normalizedURLs;
