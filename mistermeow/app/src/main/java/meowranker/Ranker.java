@@ -1,8 +1,7 @@
 package meowranker;
 
 import java.util.*;
-import com.google.common.HashMap;
-import com.google.common.Map;
+import java.lang.Math;
 
 public class Ranker {
     
@@ -26,7 +25,7 @@ public class Ranker {
         
         currRank = calculateCurrRank(prevRank, UrlsCount, d, M_hat);
         
-        while(Norm(currRank) - Norm(prevRank)> 1e-10){
+        while(Norm(currRank , UrlsCount) - Norm(prevRank , UrlsCount)> 1e-10){
             prevRank=currRank;
             currRank = calculateCurrRank(prevRank, UrlsCount, d, M_hat);
         }
@@ -49,9 +48,13 @@ public class Ranker {
         return currRank;
     }
 
-    public double Norm(double[] vector){
+    public double Norm(double[] vector , int size){
         double norm = 0;
-        //TODO: implement
-        return norm;
+
+        for(int i =0 ; i<size ; i++){
+            norm +=vector[i]*vector[i];
+        }
+
+        return Math.sqrt(norm);
     }
 }
