@@ -18,7 +18,7 @@ public class QueueManager {
 
   public QueueManager() {
     priorityQ = new PriorityQueue(1, new UrlComparator());
-    domainIndexMp = HashBiMap.create();
+    domainIndexMp = HashBiMap.create();   
     domainQs = new PriorityQueue(domainQCapacity, new llComparator());
     domainQListSize = 0;
   }
