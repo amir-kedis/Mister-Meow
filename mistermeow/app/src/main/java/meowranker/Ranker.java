@@ -5,7 +5,7 @@ import java.lang.Math;
 
 public class Ranker {
     
-    public double[] getPopularity(double[][] M , int UrlsCount){
+    public static double[] getPopularity(double[][] M , int UrlsCount){
 
         //TODO: implement logic 
         
@@ -33,7 +33,7 @@ public class Ranker {
         return currRank;
     }   
 
-    public double[] calculateCurrRank(double[] prevRank  , int UrlsCount , double d , double[][] M_hat){
+    public static double[] calculateCurrRank(double[] prevRank  , int UrlsCount , double d , double[][] M_hat){
         
         double[] currRank = new double[UrlsCount];
     
@@ -48,7 +48,7 @@ public class Ranker {
         return currRank;
     }
 
-    public double Norm(double[] vector , int size){
+    public static double Norm(double[] vector , int size){
         double norm = 0;
 
         for(int i =0 ; i<size ; i++){
