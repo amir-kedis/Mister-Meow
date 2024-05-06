@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
+@font-face {
+  font-family: "Bilya Layered";
+  src: local("Bilya Layered BASE"), local("Bilya-Layered-BASE"),
+    url("./assets/BILYALAYEREDBASE.woff2") format("woff2"),
+    url("./assets/BILYALAYEREDBASE.woff") format("woff"),
+    url("./assets/BILYALAYEREDBASE.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 @layer base {
   :root {
     --home-bg: #ffffff;

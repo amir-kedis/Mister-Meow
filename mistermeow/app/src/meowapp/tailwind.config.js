@@ -26,6 +26,11 @@ const backgroundColor = {
   "sr-tag": generateColorClass("tag-secondary"),
 };
 
+const fontFamily = {
+  bilya: ["Bilya Layered", "sans-serif"],
+  inter: ["Inter", "sans-serif"],
+};
+
 module.exports = {
   darkMode: ["class"],
   content: [
@@ -39,6 +44,7 @@ module.exports = {
     extend: {
       textColor,
       backgroundColor,
+      fontFamily,
     },
   },
   plugins: [require("tailwindcss-animate")],
