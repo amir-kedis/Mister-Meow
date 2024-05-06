@@ -4,5 +4,86 @@
 
 @layer base {
   :root {
+    --home-bg: #ffffff;
+    --bottom-nav-bg: #f2f2f2;
+    --tie-color: #db3328;
+    --btn-bg: #db3328;
+    --btn-txt: #fefefe;
+    --icon-color: #9aa0a6;
+    --primary-txt: #000000;
+    --bottom-nav-txt: #5f6368;
+    --search-bar-border: #dfe1e5;
+    --search-bar-bg: #ffffff;
+    --search-bar-shadow: #202124;
+    --cap-text: #404040;
+    --tag-primary: #047857;
+    --tag-secondary: #d1fae5;
+    --sr-host: #202124;
+    --sr-url: #036348;
+    --sr-title: #013860;
+    --sr-snippet: #5f6368;
+  }
+
+  .dark {
+    --home-bg: #202124;
+    --bottom-nav-bg: #303134;
+    --tie-color: #000000;
+    --btn-bg: #303134;
+    --btn-txt: #fefefe;
+    --icon-color: #9aa0a6;
+    --primary-txt: #e8e8e8;
+    --bottom-nav-txt: #e8e8e8;
+    --search-bar-border: #5f6368;
+    --search-bar-bg: #202124;
+    --search-bar-shadow: #202124;
+    --cap-text: #ffffff;
+    --tag-primary: #047857;
+    --tag-secondary: #dafcea;
+    --sr-host: #ffffff;
+    --sr-url: #0ebe8c;
+    --sr-title: #40a4ed;
+    --sr-snippet: #ffffff;
+  }
+
+  .black {
+    --home-bg: #ffffff;
+    --bottom-nav-bg: #f2f2f2;
+    --tie-color: #000000;
+    --btn-bg: #000000;
+    --btn-txt: #fefefe;
+    --icon-color: #9aa0a6;
+    --primary-txt: #000000;
+    --bottom-nav-txt: #5f6368;
+    --search-bar-border: #dfe1e5;
+    --search-bar-bg: #fffffff;
+    --search-bar-shadow: #202124;
+    --cap-text: #404040;
+    --tag-primary: #000000;
+    --tag-secondary: #ffffff;
+    --sr-host: #202124;
+    --sr-url: #036348;
+    --sr-title: #013860;
+    --sr-snippet: #5f6368;
+  }
+
+  .rose {
+    --home-bg: #db3328;
+    --bottom-nav-bg: #af261d;
+    --tie-color: #000000;
+    --btn-bg: #ffffff;
+    --btn-txt: #000000;
+    --icon-color: #9aa0a6;
+    --primary-txt: #000000;
+    --bottom-nav-txt: #ffffff;
+    --search-bar-border: #dfe1e5;
+    --search-bar-bg: #fffffff;
+    --search-bar-shadow: #202124;
+    --cap-text: #404040;
+    --tag-primary: #047857;
+    --tag-secondary: #d1fae5;
+    --sr-host: #202124;
+    --sr-url: #036348;
+    --sr-title: #013860;
+    --sr-snippet: #5f6368;
   }
 }
