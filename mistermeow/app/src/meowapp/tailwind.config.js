@@ -35,6 +35,7 @@ const colors = {
   searchBorder: generateColorClass("search-bar-border"),
   searchShadow: generateColorClass("search-bar-shadow"),
   icon: generateColorClass("icon-color"),
+  "sr-tag": generateColorClass("tag-primary"),
 };
 
 const fontFamily = {

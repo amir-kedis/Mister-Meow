@@ -3,25 +3,24 @@ import Footer from "@/components/Footer.tsx";
 import { ThemeContext } from "./contexts/themeContext.tsx";
 import { useContext, useState } from "react";
 import Banner from "./components/Banner.tsx";
+import { useQuery } from "react-query";
+import { fetchResults } from "./utils/results-api.tsx";
 
 interface ThemeContextType {
   theme: string;
 }
 
 export interface SRPProps {
-  searchResults: {
-    results: any[];
-    count: number;
-    tags: string[];
-    suggestions: string[];
-  };
-  page: number;
+  initQuery?: string;
+  page?: number;
 }
 
-function SRP({ searchResults, page }: SRPProps) {
-  // FIXME: dump conversion learn to make the correct way
+function SRP({ initQuery, page = 1 }: SRPProps) {
   const { theme } = useContext(ThemeContext) as unknown as ThemeContextType;
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initQuery || "");
+  const { data, isLoading, isError } = useQuery(["search", query, page], () =>
+    fetchResults(query, page)
+  );
 
   return (
     <div
@@ -37,7 +36,42 @@ function SRP({ searchResults, page }: SRPProps) {
           />
         </div>
       </nav>
-      <div className="flex-grow"> </div>
+      <div className="flex-grow container">
+        {isLoading && (
+          <div className="flex place-items-center text-center justify-center font-bilya">
+            Loading...
+          </div>
+        )}
+        {isError && (
+          <div className="flex place-items-center text-center justify-center font-bilya">
+            Error fetching results
+          </div>
+        )}
+
+        {!isLoading && !isError && data && data.results?.length == 0 && (
+          <div className="flex place-items-center text-center justify-center font-bilya">
+            No results found
+          </div>
+        )}
+
+        {!isLoading && !isError && data && (
+          <div>
+            <h6 className="font-inder mt-1 text-caption text-sm ">
+              Meow Found about {data.count.toLocaleString()} results
+            </h6>
+            <div className="mt-1 flex no-wrap gap-4 place-items-center">
+              {data.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-sm text-sr-tag bg-sr-tag pl-4 pr-4 pt-2 pb-2 rounded-full border border-sr-tag"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
       <Footer />
     </div>
   );
