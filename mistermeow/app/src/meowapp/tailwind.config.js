@@ -1,3 +1,5 @@
+const { text } = require("stream/consumers");
+
 /** @type {import('tailwindcss').Config} */
 const generateColorClass = (variable) => {
   return ({ opacityValue }) => `var(--${variable})`;
@@ -29,7 +31,10 @@ const backgroundColor = {
 const fontFamily = {
   bilya: ["Bilya Layered", "sans-serif"],
   inter: ["Inter", "sans-serif"],
+  jetbrains: ["JetBrains Mono", "monospace"],
 };
+
+const fillColors = textColor;
 
 module.exports = {
   darkMode: ["class"],
@@ -45,6 +50,7 @@ module.exports = {
       textColor,
       backgroundColor,
       fontFamily,
+      fillColors,
     },
   },
   plugins: [require("tailwindcss-animate")],
