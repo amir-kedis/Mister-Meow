@@ -4,7 +4,7 @@ import Banner from "./components/Banner.tsx";
 
 function Home() {
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen fill-current">
       <div className="flex-grow flex flex-col justify-center items-center">
         <Banner />
         <SearchBar />
