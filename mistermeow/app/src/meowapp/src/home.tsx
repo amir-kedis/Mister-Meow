@@ -13,14 +13,15 @@ function Home() {
   const { theme } = useContext(ThemeContext) as unknown as ThemeContextType;
   const [query, setQuery] = useState("");
 
-  const submitHandler = (e) => {
+  const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Search button clicked");
+    // TODO: GO to SRP and give it the results
   };
 
   return (
     <div
-      className={` ${theme} flex flex-col bg-home text-primary h-screen fill-current`}
+      className={` ${theme} flex flex-col bg-home text-primary h-screen font-inter fill-current`}
     >
       <div className="flex-grow flex flex-col justify-center items-center">
         <Banner />
