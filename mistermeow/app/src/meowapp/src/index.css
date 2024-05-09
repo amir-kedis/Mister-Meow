@@ -1,12 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
-
 @font-face {
   font-family: "Bilya Layered";
-  src: local("Bilya Layered BASE"), local("Bilya-Layered-BASE"),
+  src:
+    local("Bilya Layered BASE"),
+    local("Bilya-Layered-BASE"),
     url("./assets/BILYALAYEREDBASE.woff2") format("woff2"),
     url("./assets/BILYALAYEREDBASE.woff") format("woff"),
     url("./assets/BILYALAYEREDBASE.ttf") format("truetype");
@@ -98,5 +99,34 @@
     --sr-url: #036348;
     --sr-title: #013860;
     --sr-snippet: #5f6368;
+  }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 0 4rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    padding: 0 6rem;
   }
 }
