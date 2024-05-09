@@ -6,6 +6,7 @@ const generateColorClass = (variable) => {
 };
 
 const textColor = {
+  primary: generateColorClass("primary-txt"),
   logo: generateColorClass("primary-txt"),
   logoCaption: generateColorClass("secondary-txt"),
   nav: generateColorClass("bottom-nav-txt"),
@@ -26,6 +27,10 @@ const backgroundColor = {
   "nav-icon": generateColorClass("nav-icon-bg"),
   tie: generateColorClass("tie-color"),
   "sr-tag": generateColorClass("tag-secondary"),
+};
+
+const colors = {
+  tie: generateColorClass("tie-color"),
 };
 
 const fontFamily = {
@@ -51,6 +56,7 @@ module.exports = {
       backgroundColor,
       fontFamily,
       fillColors,
+      colors,
     },
   },
   plugins: [require("tailwindcss-animate")],

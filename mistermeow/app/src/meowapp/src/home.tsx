@@ -7,7 +7,9 @@ import { useContext } from "react";
 function Home() {
   const { theme, setTheme } = useContext(ThemeContext);
   return (
-    <div className={` ${theme} flex flex-col h-screen fill-current`}>
+    <div
+      className={` ${theme} flex flex-col bg-home text-primary h-screen fill-current`}
+    >
       <div className="flex-grow flex flex-col justify-center items-center">
         <Banner />
         <SearchBar />
