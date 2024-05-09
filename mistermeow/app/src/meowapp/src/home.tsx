@@ -29,7 +29,7 @@ function Home() {
           className="flex flex-col place-items-center gap-1"
           onSubmit={submitHandler}
         >
-          <SearchBar query={query} setQuery={setQuery} />
+          <SearchBar query={query} setQuery={setQuery} className="mt-5" />
           <button
             type="submit"
             className="mt-4 bg-btn text-btn font-inter font-semibold text-base rounded pl-4 pr-4 pt-2 pb-2 hover:filter hover:saturate-50 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"

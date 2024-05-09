@@ -23,13 +23,13 @@ function SearchBar({ query, setQuery, className }: SearchBarProps) {
     ref,
     isComponentVisible: isFocused,
     setIsComponentVisible,
-  } = useComponentVisible(true);
+  } = useComponentVisible(false);
 
   return (
     <div
       ref={ref}
       className={
-        "bg-search border border-searchBorder rounded-[22px] lg:min-w-[585px] md:min-w-[585px] sm:min-w-full cursor-pointer select-text mt-5 " +
+        "bg-search border border-searchBorder rounded-[22px] lg:min-w-[585px] md:min-w-[585px] sm:min-w-full cursor-pointer select-text " +
         className
       }
     >

@@ -8,8 +8,8 @@ function App() {
     <>
       <ThemeProvider>
         <div className="dark rose black hidden"></div>
-        <Home />
-        {/* <SRP /> */}
+        {/* <Home /> */}
+        <SRP />
       </ThemeProvider>
     </>
   );
