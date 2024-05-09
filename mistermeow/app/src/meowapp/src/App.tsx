@@ -1,9 +1,14 @@
 import Home from "./home";
 
+import { ThemeProvider } from "./contexts/themeContext";
+
 function App() {
   return (
     <>
-      <Home />
+      <ThemeProvider>
+        <div className="dark rose black hidden"></div>
+        <Home />
+      </ThemeProvider>
     </>
   );
 }
