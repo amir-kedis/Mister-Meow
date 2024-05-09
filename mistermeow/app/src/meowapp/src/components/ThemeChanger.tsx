@@ -5,7 +5,7 @@ import { useContext, useState } from "react";
 const themes = ["light", "dark", "rose", "black"];
 
 function ThemeChanger() {
-  const { theme, setTheme } = useContext(ThemeContext);
+  const { theme, setTheme } = useContext(ThemeContext) as unknown as any;
   const [dropdown, showDropdown] = useState(false);
 
   const changeTheme = (theme: string) => {
