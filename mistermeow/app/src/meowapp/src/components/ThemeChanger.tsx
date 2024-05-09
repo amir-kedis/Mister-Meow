@@ -15,6 +15,7 @@ function ThemeChanger() {
 
   const dropdownMenu = () => (
     <div className="flex flex-col absolute w-96 nav-text bg-nav rounded-lg p-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <h4 className="text-lg font-bold">Select Theme:</h4>
       {themes.map((item) => (
         <div
           key={item}
