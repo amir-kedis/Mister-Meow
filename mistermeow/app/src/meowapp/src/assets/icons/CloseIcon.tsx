@@ -17,9 +17,9 @@ export default function CloseIcon({ className, ...rest }: CloseIconProps) {
       <path
         d="M1 13L13 1M1 1L13 13"
         stroke="current"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
