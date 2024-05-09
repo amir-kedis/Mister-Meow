@@ -9,7 +9,7 @@ export default function Logo({ className, size }: LogoProps) {
       className={className}
       width={
         size === "sm"
-          ? "74"
+          ? "37"
           : size === "md"
           ? "111"
           : size === "lg"
@@ -18,7 +18,7 @@ export default function Logo({ className, size }: LogoProps) {
       }
       height={
         size === "sm"
-          ? "87"
+          ? "43"
           : size === "md"
           ? "130"
           : size === "lg"
