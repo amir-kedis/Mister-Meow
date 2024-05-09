@@ -34,6 +34,7 @@ const colors = {
   tie: generateColorClass("tie-color"),
   searchBorder: generateColorClass("search-bar-border"),
   searchShadow: generateColorClass("search-bar-shadow"),
+  icon: generateColorClass("icon-color"),
 };
 
 const fontFamily = {
