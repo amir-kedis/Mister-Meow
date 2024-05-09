@@ -5,6 +5,7 @@ import { useContext, useState } from "react";
 import Banner from "./components/Banner.tsx";
 import { useQuery } from "react-query";
 import { fetchResults } from "./utils/results-api.tsx";
+import CatIcon from "./assets/icons/CatIcon.tsx";
 
 interface ThemeContextType {
   theme: string;
@@ -24,7 +25,7 @@ function SRP({ initQuery, page = 1 }: SRPProps) {
 
   return (
     <div
-      className={` ${theme} flex flex-col bg-home text-primary h-screen font-inter fill-current`}
+      className={` ${theme} flex flex-col bg-home text-primary min-h-screen font-inter fill-current`}
     >
       <nav className="flex pt-4 pb-4 border-searchBorder border-b">
         <div className="container flex gap-3">
@@ -68,6 +69,50 @@ function SRP({ initQuery, page = 1 }: SRPProps) {
                   {tag}
                 </span>
               ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div className="col-span-2">
+                {data.results.map((result) => (
+                  <div className="mb-4" key={result.url}>
+                    <a href={result.url} target="_blank" rel="noreferrer">
+                      <div className="flex gap-2">
+                        <CatIcon />
+                        <div className="flex flex-col ">
+                          <span className="text-sm text-sr-host leading-tight">
+                            {result.host}
+                          </span>
+                          <span className="text-sm text-sr-url leading-tight hover:underline">
+                            {result.url}
+                          </span>
+                        </div>
+                      </div>
+                      <h3 className="text-sr-title text-xl hover:underline">
+                        {result.title}
+                      </h3>
+                      <p className="text-sr-snippet leading-tight">
+                        {result.snippets}
+                      </p>
+                    </a>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div className="flex flex-col gap-2">
+                  <h6 className="text-base text-sr-tag font-bold">
+                    Related Searches
+                  </h6>
+                  {data.suggestions.map((suggestion) => (
+                    <a
+                      key={suggestion}
+                      onClick={() => setQuery(suggestion)}
+                      href="#"
+                      className="text-sm hover:underline"
+                    >
+                      {suggestion}
+                    </a>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}

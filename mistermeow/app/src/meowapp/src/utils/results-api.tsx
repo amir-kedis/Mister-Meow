@@ -6,28 +6,70 @@ async function fetchResults(query: string, page: number) {
         url: "https://cattime.com/cat-breeds",
         title: "Cat Breeds - Types of Cats - CatTime",
         snippets:
-          "List of <b>Cat</b> Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Compare breed Read Breed Profile. American Curl. …",
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
       },
       {
         host: "CatTime",
         url: "https://cattime.com/cat-breeds",
         title: "Cat Breeds - Types of Cats - CatTime",
         snippets:
-          "List of <b>Cat</b> Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Compare breed Read Breed Profile. American Curl. …",
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
       },
       {
         host: "CatTime",
         url: "https://cattime.com/cat-breeds",
         title: "Cat Breeds - Types of Cats - CatTime",
         snippets:
-          "List of <b>Cat</b> Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Compare breed Read Breed Profile. American Curl. …",
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
       },
       {
         host: "CatTime",
         url: "https://cattime.com/cat-breeds",
         title: "Cat Breeds - Types of Cats - CatTime",
         snippets:
-          "List of <b>Cat</b> Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Compare breed Read Breed Profile. American Curl. …",
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
+      },
+      {
+        host: "CatTime",
+        url: "https://cattime.com/cat-breeds",
+        title: "Cat Breeds - Types of Cats - CatTime",
+        snippets:
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
+      },
+      {
+        host: "CatTime",
+        url: "https://cattime.com/cat-breeds",
+        title: "Cat Breeds - Types of Cats - CatTime",
+        snippets:
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
+      },
+      {
+        host: "CatTime",
+        url: "https://cattime.com/cat-breeds",
+        title: "Cat Breeds - Types of Cats - CatTime",
+        snippets:
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
+      },
+      {
+        host: "CatTime",
+        url: "https://cattime.com/cat-breeds",
+        title: "Cat Breeds - Types of Cats - CatTime",
+        snippets:
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
+      },
+      {
+        host: "CatTime",
+        url: "https://cattime.com/cat-breeds",
+        title: "Cat Breeds - Types of Cats - CatTime",
+        snippets:
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
+      },
+      {
+        host: "CatTime",
+        url: "https://cattime.com/cat-breeds",
+        title: "Cat Breeds - Types of Cats - CatTime",
+        snippets:
+          "List of Cat Breeds. Abyssinian. Compare breed Read Breed Profile. Aegean. Compare breed Read Breed Profile. American Bobtail. Read Breed Profile. American Curl. …",
       },
     ],
     count: 3200420,
