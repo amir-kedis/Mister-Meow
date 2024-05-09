@@ -18,7 +18,7 @@ function SearchBar({ query, setQuery }: SearchBarProps) {
   );
 
   return (
-    <div className="bg-search border border-searchBorder mt-5 rounded-[22px] min-w-[585px] cursor-pointer select-text">
+    <div className="bg-search border border-searchBorder mt-5 rounded-[22px] lg:min-w-[585px] md:min-w-[585px] sm:min-w-full cursor-pointer select-text">
       <div className="min-h-[44px] flex place-items-center">
         <SearchIcon className="ml-4 select-none cursor-default" />
         <input
