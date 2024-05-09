@@ -27,10 +27,13 @@ const backgroundColor = {
   "nav-icon": generateColorClass("nav-icon-bg"),
   tie: generateColorClass("tie-color"),
   "sr-tag": generateColorClass("tag-secondary"),
+  search: generateColorClass("search-bar-bg"),
 };
 
 const colors = {
   tie: generateColorClass("tie-color"),
+  searchBorder: generateColorClass("search-bar-border"),
+  searchShadow: generateColorClass("search-bar-shadow"),
 };
 
 const fontFamily = {

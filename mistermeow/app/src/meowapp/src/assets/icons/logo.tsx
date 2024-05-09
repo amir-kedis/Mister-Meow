@@ -31,7 +31,7 @@ export default function Logo({ className, size }: LogoProps) {
     >
       <ellipse
         cx="74.0699"
-        cy="95.5515"
+        cy="93.5515"
         rx="71.6637"
         ry="57.3997"
         fill="white"
