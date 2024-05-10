@@ -43,7 +43,9 @@ public class Tokenizer {
     /**
      * Increment the count of the token
      */
-    public void increment() { count++; }
+    public void increment() {
+      count++;
+    }
   }
 
   // NOTE: CLASS tokenizer |||| Data Members
@@ -97,8 +99,7 @@ public class Tokenizer {
     try {
       // NOTE: root path is src/meowindexer/app/. everything is relative to this
       // path
-      BufferedReader reader =
-          new BufferedReader(new FileReader("../data/" + filename));
+      BufferedReader reader = new BufferedReader(new FileReader("../data/" + filename));
       String line;
       while ((line = reader.readLine()) != null) {
         stopWords.add(line.trim());
@@ -127,7 +128,12 @@ public class Tokenizer {
 
     for (String word : words) {
       if (word.length() > 1 && !stopWords.contains(word)) {
-        tokens.add(stemmer.stem(word));
+        String stemmedWord = stemmer.stem(word);
+
+        if (!stemmedWord.equals(word))
+          tokens.add(stemmer.stem(word));
+
+        tokens.add(word);
       }
     }
 
@@ -184,11 +190,10 @@ public class Tokenizer {
     final String ANSI_YELLOW = "\u001B[33m";
     final String ANSI_RESET2 = "\u001B[0m";
     tokens.entrySet().stream().forEach(
-        e
-        -> System.out.println(ANSI_YELLOW + "{ "
-                              + "word: " + e.getKey() + ", "
-                              + "count: " + e.getValue().count + ", "
-                              + "position: " + e.getValue().position + " }" +
-                              ANSI_RESET2));
+        e -> System.out.println(ANSI_YELLOW + "{ "
+            + "word: " + e.getKey() + ", "
+            + "count: " + e.getValue().count + ", "
+            + "position: " + e.getValue().position + " }" +
+            ANSI_RESET2));
   }
 }
