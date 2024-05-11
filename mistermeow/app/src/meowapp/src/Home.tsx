@@ -17,7 +17,7 @@ function Home() {
 
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Search button clicked");
+    if (!query) return;
     navigate(`/search/${query}/1`);
   };
 
