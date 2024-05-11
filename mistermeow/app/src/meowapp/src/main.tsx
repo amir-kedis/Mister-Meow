@@ -19,7 +19,7 @@ const BrowserRouter = createBrowserRouter([
   {
     path: "/search/:query/:page",
     element: <SRP />,
-    loader: SRPLoader,
+    loader: SRPLoader as any,
     errorElement: <ErrorPage />,
   },
 ]);
