@@ -12,7 +12,7 @@ function Banner({ size }: BannerProps) {
         <h1
           className={`text-${
             size == "sm" ? "base" : "5xl"
-          } font-bilya font-bold tracking-widest max-w-[6ch] leading-normal`}
+          } text-5xl font-bilya font-bold tracking-widest max-w-[6ch] leading-normal`}
         >
           Mister Meow
         </h1>

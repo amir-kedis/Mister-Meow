@@ -1,3 +1,17 @@
+export interface Result {
+  host: string;
+  url: string;
+  title: string;
+  snippets: string;
+}
+
+export interface Results {
+  results: Result[];
+  count: number;
+  tags: string[];
+  suggestions: string[];
+}
+
 async function fetchResults(query: string, page: number) {
   return Promise.resolve({
     results: [
