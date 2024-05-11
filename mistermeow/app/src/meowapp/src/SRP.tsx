@@ -55,14 +55,14 @@ function SRP() {
     <div
       className={` ${theme} flex flex-col bg-home text-mprimary min-h-screen font-inter fill-current`}
     >
-      <nav className="flex pt-4 pb-4 border-searchBorder border-b">
-        <div className="container flex gap-3">
+      <nav className="flex pt-4 pb-4 border-searchBorder max-h-[78px] relative border-b">
+        <div className="container flex gap-3 ">
           <Link to="/">
             <Banner size="sm" />
           </Link>
           <Form onSubmit={submitHandler}>
             <SearchBar
-              className="mt-0 inline-block"
+              className="mt-0 inline-block z-[1000]"
               query={query}
               setQuery={setQuery}
             />
