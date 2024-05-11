@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import {
   Pagination,
@@ -23,8 +23,6 @@ export default function SRPPagination({
   query,
   setPage,
 }: SRPPaginationProps) {
-  const navigate = useNavigate();
-
   const numberOfPages = Math.ceil(resultsCount / 20); // FIXME: Hardcoded 20 change later
   console.log("Number of pages", numberOfPages);
 
