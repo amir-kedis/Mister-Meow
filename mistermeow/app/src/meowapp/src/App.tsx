@@ -1,16 +1,11 @@
-import Home from "./home";
+import Home from "./Home";
 
-import { ThemeProvider } from "./contexts/themeContext";
 import SRP from "./SRP";
 
 function App() {
   return (
     <>
-      <ThemeProvider>
-        <div className="dark rose black hidden"></div>
-        {/* <Home /> */}
-        <SRP />
-      </ThemeProvider>
+      <SRP />
     </>
   );
 }

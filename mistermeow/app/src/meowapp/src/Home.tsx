@@ -1,6 +1,7 @@
 import SearchBar from "./components/SearchBar.tsx";
 import Footer from "./components/Footer.tsx";
 import Banner from "./components/Banner.tsx";
+import { Form, useNavigate } from "react-router-dom";
 import { ThemeContext } from "./contexts/themeContext.tsx";
 import { useContext, useState } from "react";
 
@@ -12,11 +13,12 @@ function Home() {
   // FIXME: dump conversion learn to make the correct way
   const { theme } = useContext(ThemeContext) as unknown as ThemeContextType;
   const [query, setQuery] = useState("");
+  const navigate = useNavigate();
 
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Search button clicked");
-    // TODO: GO to SRP and give it the results
+    navigate(`/search/${query}/1`);
   };
 
   return (
@@ -25,9 +27,10 @@ function Home() {
     >
       <div className="flex-grow flex flex-col justify-center items-center">
         <Banner />
-        <form
+        <Form
           className="flex flex-col place-items-center gap-1"
           onSubmit={submitHandler}
+          action="GET"
         >
           <SearchBar query={query} setQuery={setQuery} className="mt-5" />
           <button
@@ -36,7 +39,7 @@ function Home() {
           >
             Meow Search
           </button>
-        </form>
+        </Form>
       </div>
       <Footer />
     </div>

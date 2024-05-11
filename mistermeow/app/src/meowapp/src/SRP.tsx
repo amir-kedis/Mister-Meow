@@ -3,9 +3,20 @@ import Footer from "@/components/Footer.tsx";
 import { ThemeContext } from "./contexts/themeContext.tsx";
 import { useContext, useState } from "react";
 import Banner from "./components/Banner.tsx";
-import { useQuery } from "react-query";
 import { fetchResults } from "./utils/results-api.tsx";
 import CatIcon from "./assets/icons/CatIcon.tsx";
+import { Link, useLoaderData, useNavigate, Form } from "react-router-dom";
+import { Results } from "./utils/results-api.tsx";
+
+export async function loader({
+  params = { query: "", page: 1 },
+}): Promise<{ data: Results; query: string; page: number }> {
+  const { query, page } = params;
+  console.log("Query", query);
+  console.log("Page", page);
+  const data = await fetchResults(query, page);
+  return { data, query, page };
+}
 
 interface ThemeContextType {
   theme: string;
@@ -16,12 +27,28 @@ export interface SRPProps {
   page?: number;
 }
 
-function SRP({ initQuery, page = 1 }: SRPProps) {
+function SRP() {
+  const {
+    data,
+    query: initQuery,
+    page: initPage,
+  } = useLoaderData() as {
+    data: Results;
+    query: string;
+    page: number;
+  };
   const { theme } = useContext(ThemeContext) as unknown as ThemeContextType;
   const [query, setQuery] = useState(initQuery || "");
-  const { data, isLoading, isError } = useQuery(["search", query, page], () =>
-    fetchResults(query, page)
-  );
+  const [page, setPage] = useState(initPage || 1);
+  const navigate = useNavigate();
+
+  console.log(data);
+
+  const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("Search button clicked");
+    navigate(`/search/${query}/1`);
+  };
 
   return (
     <div
@@ -29,33 +56,26 @@ function SRP({ initQuery, page = 1 }: SRPProps) {
     >
       <nav className="flex pt-4 pb-4 border-searchBorder border-b">
         <div className="container flex gap-3">
-          <Banner size="sm" />
-          <SearchBar
-            className="mt-0 inline-block"
-            query={query}
-            setQuery={setQuery}
-          />
+          <Link to="/">
+            <Banner size="sm" />
+          </Link>
+          <Form onSubmit={submitHandler}>
+            <SearchBar
+              className="mt-0 inline-block"
+              query={query}
+              setQuery={setQuery}
+            />
+          </Form>
         </div>
       </nav>
       <div className="flex-grow container">
-        {isLoading && (
-          <div className="flex place-items-center text-center justify-center font-bilya">
-            Loading...
-          </div>
-        )}
-        {isError && (
-          <div className="flex place-items-center text-center justify-center font-bilya">
-            Error fetching results
-          </div>
-        )}
-
-        {!isLoading && !isError && data && data.results?.length == 0 && (
+        {data && data.results?.length == 0 && (
           <div className="flex place-items-center text-center justify-center font-bilya">
             No results found
           </div>
         )}
 
-        {!isLoading && !isError && data && (
+        {data && (
           <div>
             <h6 className="font-inder mt-1 text-caption text-sm ">
               Meow Found about {data.count.toLocaleString()} results
