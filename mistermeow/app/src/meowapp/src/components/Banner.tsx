@@ -10,9 +10,9 @@ function Banner({ size }: BannerProps) {
       <div className="flex justify-center gap-3 place-items-center">
         <Logo size={size} />
         <h1
-          className={`text-${
-            size == "sm" ? "base" : "5xl"
-          } text-5xl font-bilya font-bold tracking-widest max-w-[6ch] leading-normal`}
+          className={`${
+            size == "sm" ? "text-sm" : "text-5xl"
+          } font-bilya font-bold tracking-widest max-w-[6ch] leading-normal`}
         >
           Mister Meow
         </h1>
