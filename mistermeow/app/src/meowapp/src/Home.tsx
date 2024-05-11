@@ -23,7 +23,7 @@ function Home() {
 
   return (
     <div
-      className={` ${theme} flex flex-col bg-home text-primary h-screen font-inter fill-current`}
+      className={` ${theme} flex flex-col bg-home text-mprimary h-screen font-inter fill-current`}
     >
       <div className="flex-grow flex flex-col justify-center items-center">
         <Banner />
