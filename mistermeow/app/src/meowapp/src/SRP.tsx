@@ -117,14 +117,15 @@ function SRP() {
                 ))}
               </div>
               <div>
-                <div className="flex flex-col gap-2">
-                  <h6 className="text-base text-sr-tag font-bold">
-                    Related Searches
-                  </h6>
+                <div className="flex sticky top-6 flex-col gap-2 rounded-xl bg-search border p-4 drop-shadow-sm shadow-searchShadow">
+                  <h6 className="text-base font-bold">Related Searches</h6>
                   {data.suggestions.map((suggestion) => (
                     <a
                       key={suggestion}
-                      onClick={() => setQuery(suggestion)}
+                      onClick={() => {
+                        setQuery(suggestion);
+                        navigate(`/search/${suggestion}/1`);
+                      }}
                       href="#"
                       className="text-sm hover:underline"
                     >
