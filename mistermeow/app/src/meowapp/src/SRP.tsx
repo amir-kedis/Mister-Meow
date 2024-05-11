@@ -7,6 +7,7 @@ import { fetchResults } from "./utils/results-api.tsx";
 import CatIcon from "./assets/icons/CatIcon.tsx";
 import { Link, useLoaderData, useNavigate, Form } from "react-router-dom";
 import { Results } from "./utils/results-api.tsx";
+import SRPPagination from "./components/SRPPagination.tsx";
 
 export async function loader({
   params = { query: "", page: 1 },
@@ -52,7 +53,7 @@ function SRP() {
 
   return (
     <div
-      className={` ${theme} flex flex-col bg-home text-primary min-h-screen font-inter fill-current`}
+      className={` ${theme} flex flex-col bg-home text-mprimary min-h-screen font-inter fill-current`}
     >
       <nav className="flex pt-4 pb-4 border-searchBorder border-b">
         <div className="container flex gap-3">
@@ -115,6 +116,12 @@ function SRP() {
                     </a>
                   </div>
                 ))}
+                <SRPPagination
+                  page={Number(page)}
+                  query={query}
+                  resultsCount={data.count}
+                  setPage={setPage}
+                />
               </div>
               <div>
                 <div className="flex sticky top-6 flex-col gap-2 rounded-xl bg-search border p-4 drop-shadow-sm shadow-searchShadow">
@@ -138,6 +145,7 @@ function SRP() {
           </div>
         )}
       </div>
+
       <Footer />
     </div>
   );
