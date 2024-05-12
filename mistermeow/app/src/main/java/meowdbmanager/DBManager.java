@@ -182,7 +182,7 @@ public class DBManager {
       System.out.println("Error while getting urls count: " + e.getMessage());
       return -1;
     }
-  }
+  } 
 
   /**
    * getParentsArr - returns an array of parents for a certain url.

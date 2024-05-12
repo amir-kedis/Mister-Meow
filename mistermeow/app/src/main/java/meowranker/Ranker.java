@@ -5,6 +5,10 @@ import java.util.*;
 import java.lang.Math;
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
+import org.bson.types.ObjectId;
+import org.bson.Document;
+
+import com.google.common.collect.Table;
 
 public class Ranker {
 
@@ -87,7 +91,6 @@ public class Ranker {
     public double[][] constructUrlsGraph() {
         // Number of nodes in graph is number of urls in database.
         int nodesNum = db.getUrlsCount();
-        System.out.println(nodesNum);
         // Create a 2D array filled with 0s initialiy.
         double[][] graph = new double[nodesNum][nodesNum];
 
@@ -150,4 +153,58 @@ public class Ranker {
         }
     }
 
+    public List<Double> calculateRelevance(List<Document> docs, List<String> searchTokens , double[] popularity) {
+        List<Double> relevance = new ArrayList<>();
+
+        for (int i = 0; i < docs.size(); i++) {
+            double val = 0;
+            for (String token : searchTokens) {
+                // summation(tf-idf)
+                val += db.getDocumentFromInverted(token , docs.get(i).getObjectId("_id")) * getIDF(token);      
+            }
+            relevance.add(val);
+
+        }
+
+        return relevance;
+    }
+
+    public double getIDF(String token) {
+        double df;
+        Document invertedInd = db.getInvertedIndex(token);
+        
+        if (invertedInd == null)                            //  Handling tokens that are not in any documnets
+            return 0;
+        
+        df = (double) db.getInvertedIndex(token).getInteger("DF");
+        return Math.log((double) db.getUrlsCount() / df);
+    }
+    
+    protected List<Map.Entry<Document , Double>> combineRelWithPop(List<Document> docs , List<Double> relevance , double[] popularity){
+        List<Map.Entry<Document , Double>> finalRank = new ArrayList<>();
+        int ind = 0;
+        for(Document doc : docs){
+            int ranker_id = doc.getInteger("ranker_id");
+            
+            Map.Entry<Document, Double> entry = new AbstractMap.SimpleEntry<>(doc, relevance.get(ind) + popularity[ranker_id]);
+            finalRank.add(entry);
+              
+            ind++;
+        } 
+        
+        return finalRank;
+    }
+
+    public void testTokenDocCount(List<String> searchTokens) {
+        for (String token : searchTokens) {
+            Document invertedInd = db.getInvertedIndex(token);
+            if (invertedInd == null)
+                System.out.println(0);
+            else
+                System.out.println((double) invertedInd.getInteger("DF"));
+        }
+
+    }
+
 }
+
