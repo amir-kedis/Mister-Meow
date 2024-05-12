@@ -1,5 +1,6 @@
 package meowdbmanager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import meowindexer.Tokenizer;
@@ -12,9 +13,8 @@ public class Main {
     DBManager dbManager = new DBManager();
 
     // Test inserting a document
-    String docId =
-        dbManager.insertDocument("http://example.com", "Title", "example.com",
-                                 "Content", "asdflkasd", "asdfklsdflceww");
+    String docId = dbManager.insertDocument("http://example.com", "Title", "example.com",
+        "Content", "asdflkasd", "asdfklsdflceww", 1, new ArrayList<Integer>());
     System.out.println("Inserted document ID: " + docId);
 
     // Test getting a document

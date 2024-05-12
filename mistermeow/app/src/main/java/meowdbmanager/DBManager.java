@@ -29,8 +29,7 @@ public class DBManager {
     mongoClient = MongoClients.create("mongodb://localhost:27017");
     DB = mongoClient.getDatabase("meowDB");
 
-    CreateCollectionOptions options =
-        new CreateCollectionOptions().capped(false);
+    CreateCollectionOptions options = new CreateCollectionOptions().capped(false);
     DB.createCollection("Documents", options);
     DB.createCollection("InvertedIndex", options);
 
@@ -51,17 +50,14 @@ public class DBManager {
       Bson filter = Filters.empty();
 
       // Create a projection document to specify fields to retrieve
-      Bson projection =
-          fields(include("hashedURL", "hashedDoc", "URL"), excludeId());
+      Bson projection = fields(include("hashedURL", "hashedDoc", "URL"), excludeId());
 
       // Find documents matching the filter in the docCollection
-      FindIterable<Document> matchingUrls =
-          docCollection.find(filter).projection(projection);
+      FindIterable<Document> matchingUrls = docCollection.find(filter).projection(projection);
 
       // Convert the FindIterable to a list (may not be suitable for very large
       // datasets)
-      List<Document> urlsList =
-          (List<Document>)matchingUrls.into(new ArrayList<Document>());
+      List<Document> urlsList = (List<Document>) matchingUrls.into(new ArrayList<Document>());
 
       return urlsList;
 
@@ -83,17 +79,14 @@ public class DBManager {
       Bson filter = Filters.eq("inQueue", true);
 
       // Create a projection document to specify fields to retrieve
-      Bson projection =
-          fields(include("hashedURL", "hashedDoc", "URL"), excludeId());
+      Bson projection = fields(include("hashedURL", "hashedDoc", "URL", "ranker_id"), excludeId());
 
       // Find documents matching the filter in the docCollection
-      FindIterable<Document> matchingUrls =
-          docCollection.find(filter).projection(projection);
+      FindIterable<Document> matchingUrls = docCollection.find(filter).projection(projection);
 
       // Convert the FindIterable to a list (may not be suitable for very large
       // datasets)
-      List<Document> urlList =
-          (List<Document>)matchingUrls.into(new ArrayList<Document>());
+      List<Document> urlList = (List<Document>) matchingUrls.into(new ArrayList<Document>());
 
       return urlList;
 
@@ -148,29 +141,26 @@ public class DBManager {
     } catch (MongoException e) {
       System.out.println(
           "Error while updating the inQueue state of the url.\n" +
-          e.getMessage());
+              e.getMessage());
       return false;
     }
   }
 
   /**
-   * takes a value of a certain key and increments the popularity of it.
+   * takes the key of the parents array and append a new parent to it.
    *
-   * @param key   - the key to search on.
-   * @param value - the value to match.
+   * @param key       - the key to search on.
+   * @param value     - the value to match.
+   * @param parent_id - the new parent id to add
    * @return boolean - indicating if the popularity incremented successfuly or
    *         not.
    */
-  public boolean incrementPopularity(String key, String value) {
+  public boolean updateParents(String key, String value, int parent_id) {
     try {
-      // Build a filter to find the document with the specified key & value.
-      Document filter = new Document(key, value);
-
-      // Update by incrementing the "popularity" field (atomic operation)
-      Document update = new Document("$inc", new Document("popularity", 1));
+      UpdateResult updateResult = docCollection.updateOne(Filters.eq(key, value),
+          Updates.push("parents", parent_id));
 
       // Update the document, returning true if successful
-      UpdateResult updateResult = docCollection.updateOne(filter, update);
       return updateResult.getModifiedCount() == 1;
 
     } catch (MongoException e) {
@@ -180,28 +170,29 @@ public class DBManager {
   }
 
   public String insertDocument(String url, String title, String host,
-                               String content, String hashedUrl,
-                               String hashedDoc) {
+      String content, String hashedUrl,
+      String hashedDoc, int ranker_id, List<Integer> parents) {
     try {
       // Check for valid URL
       new URL(url).toURI();
 
       Document document = new Document()
-                              .append("URL", url)
-                              .append("title", title)
-                              .append("host", host)
-                              .append("content", content)
-                              .append("hashedURL", hashedUrl)
-                              .append("hashedDoc", hashedDoc)
-                              .append("popularity", 1)
-                              .append("indexed", false)
-                              .append("inQueue", true);
+          .append("URL", url)
+          .append("title", title)
+          .append("host", host)
+          .append("content", content)
+          .append("hashedURL", hashedUrl)
+          .append("hashedDoc", hashedDoc)
+          .append("indexed", false)
+          .append("inQueue", true)
+          .append("ranker_id", ranker_id)
+          .append("parents", parents);
 
       String insertedId = docCollection.insertOne(document)
-                              .getInsertedId()
-                              .asObjectId()
-                              .getValue()
-                              .toString();
+          .getInsertedId()
+          .asObjectId()
+          .getValue()
+          .toString();
       return insertedId;
 
     } catch (MalformedURLException | URISyntaxException e) {
@@ -221,27 +212,25 @@ public class DBManager {
 
       for (String token : tokens.keySet()) {
 
-        Document result =
-            invertedCollection.find(new Document("token", token)).first();
+        Document result = invertedCollection.find(new Document("token", token)).first();
         if (result == null) {
 
           List<Document> docs = new ArrayList<>();
           docs.add(new Document("_id", new ObjectId(docID))
-                       .append("TF", tokens.get(token).count)
-                       .append("position", tokens.get(token).position));
+              .append("TF", tokens.get(token).count)
+              .append("position", tokens.get(token).position));
 
-          Document document =
-              new Document().append("token", token).append("docs", docs);
+          Document document = new Document().append("token", token).append("docs", docs);
 
           invertedCollection.insertOne(document);
         } else {
 
           Document newDoc = new Document("_id", new ObjectId(docID))
-                                .append("TF", tokens.get(token).count)
-                                .append("position", tokens.get(token).position);
+              .append("TF", tokens.get(token).count)
+              .append("position", tokens.get(token).position);
 
           invertedCollection.updateOne(Filters.eq("token", token),
-                                       Updates.push("docs", newDoc));
+              Updates.push("docs", newDoc));
         }
       }
 
@@ -267,28 +256,26 @@ public class DBManager {
     } catch (MongoException e) {
 
       System.out.println("Error occurred while getting documents: " +
-                         e.getMessage());
+          e.getMessage());
       return null;
     }
   }
 
   public Document getDocument(String docID) {
     try {
-      Document doc =
-          docCollection.find(new Document("_id", new ObjectId(docID))).first();
+      Document doc = docCollection.find(new Document("_id", new ObjectId(docID))).first();
       return doc;
     } catch (MongoException e) {
 
       System.out.println("Error occurred while getting document: " +
-                         e.getMessage());
+          e.getMessage());
       return null;
     }
   }
 
   public Document getInvertedIndex(String token) {
     try {
-      Document indices =
-          invertedCollection.find(new Document("token", token)).first();
+      Document indices = invertedCollection.find(new Document("token", token)).first();
       if (indices == null)
         return null;
 
@@ -300,7 +287,7 @@ public class DBManager {
     } catch (MongoException e) {
 
       System.out.println("Error occurred while getting indices: " +
-                         e.getMessage());
+          e.getMessage());
       return null;
     }
   }

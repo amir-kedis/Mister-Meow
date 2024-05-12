@@ -13,21 +13,24 @@ public class Crawler implements Runnable {
   static private QueueManager qM = new QueueManager();
   static private DBManager db = new DBManager();
   static private int countOfDocumentsCrawled = 0;
+  static private int rankerIndex = 0;
 
   /**
    * handleHashingURL - takes a Url, hash and check it.
    *
-   * @param nUrl - the Url to handle.
+   * @param nUrl      - the Url to handle.
+   * @param parent_id - parent url of the current url.
    * @return boolean - true if url is new (not crawled before), else return
    *         false.
    */
-  private boolean handleHashingURL(Url nUrl) {
+  private boolean handleHashingURL(Url nUrl, int parent_id) {
     // Hash and check if the url was not crawled (store it if it wasn't)
     synchronized (hM) {
       String hashedUrl = hM.HashAndCheckURL(nUrl);
       if (hashedUrl == null) {
         synchronized (db) {
-          db.incrementPopularity("URL", nUrl.getUrlString());
+          if (parent_id != -1)
+            db.updateParents("hashedURL", nUrl.getHashedURL(), parent_id);
         }
         return false;
       }
@@ -39,11 +42,12 @@ public class Crawler implements Runnable {
    * handleHashingDoc - takes a nUrl and handles its document fetching, hashing
    * and insertion into DB.
    *
-   * @param nUrl - the given url.
-   * @param doc  - the html document of the url.
+   * @param nUrl      - the given url.
+   * @param doc       - the html document of the url.
+   * @param parent_id - parent url of the current url.
    * @return void.
    */
-  private void handleHashingDoc(Url nUrl, org.jsoup.nodes.Document doc) {
+  private void handleHashingDoc(Url nUrl, org.jsoup.nodes.Document doc, int parent_id) {
     // Make sure that we are crawling english websites only.
     String docLang = doc.select("html").attr("lang");
     boolean insertOrNot = false;
@@ -68,7 +72,7 @@ public class Crawler implements Runnable {
       }
     }
 
-    this.handleInsertionIntoDB(insertOrNot, nUrl, outerDoc, doc.title());
+    this.handleInsertionIntoDB(insertOrNot, nUrl, outerDoc, doc.title(), parent_id);
     outerDoc = null;
   }
 
@@ -81,24 +85,32 @@ public class Crawler implements Runnable {
    * @param nUrl        - the nUrl from which we would get its related data.
    * @param doc         - outerHtml document of the url.
    * @param title       - of the document.
+   * @param parent_id   - parent url of the current url.
    * @return void.
    */
   private void handleInsertionIntoDB(boolean insertOrNot, Url nUrl, String doc,
-                                     String title) {
+      String title, int parent_id) {
     final String ANSI_CYAN = "\u001B[36m";
 
     // check if the url & its doc needs to be put into the database.
     if (insertOrNot) {
+
+      List<Integer> parents = new ArrayList<>();
+      parents.add(parent_id);
+
       synchronized (db) {
         db.insertDocument(nUrl.getUrlString(), title, nUrl.getDomainName(), doc,
-                          nUrl.getHashedURL(), nUrl.getHashedDoc());
+            nUrl.getHashedURL(), nUrl.getHashedDoc(), rankerIndex, parents);
+
+        nUrl.setRankerId(rankerIndex);
+
         System.out.println(ANSI_CYAN + "|| Inserted " + nUrl.getUrlString() +
-                           " into the database"
-                           + " Count: " + ++countOfDocumentsCrawled + " ||");
+            " into the database"
+            + " Count: " + ++countOfDocumentsCrawled + " ||" + " RankerId: " + rankerIndex++ + " ||");
       }
     } else {
       synchronized (db) {
-        db.incrementPopularity("hashedDoc", nUrl.getHashedDoc());
+        db.updateParents("hashedDoc", nUrl.getHashedDoc(), parent_id);
       }
     }
 
@@ -112,13 +124,13 @@ public class Crawler implements Runnable {
    * @param urls - the set of urls extracted from the html document.
    * @return void.
    */
-  public void HandleHashing(Set<String> urls) {
+  public void HandleHashing(Set<String> urls, int parent_id) {
     for (String url : urls) {
       // Create a Url object for the url string.
       Url nUrl = new Url(url, 1);
       org.jsoup.nodes.Document doc = null;
 
-      if (!this.handleHashingURL(nUrl)) {
+      if (!this.handleHashingURL(nUrl, parent_id)) {
         continue;
       }
 
@@ -126,7 +138,7 @@ public class Crawler implements Runnable {
       doc = nUrl.fetchDocument();
 
       if (doc != null) {
-        this.handleHashingDoc(nUrl, doc);
+        this.handleHashingDoc(nUrl, doc, parent_id);
       }
 
       doc = null;
@@ -167,7 +179,7 @@ public class Crawler implements Runnable {
       URLsHandler urlH = new URLsHandler();
       Set<String> extractedUrls = urlH.HandleURLs(doc, url.getUrlString());
 
-      HandleHashing(extractedUrls);
+      HandleHashing(extractedUrls, url.getRankerId());
 
       doc = null;
     }
@@ -182,7 +194,9 @@ public class Crawler implements Runnable {
   static public void loadHashedData() {
     List<Document> urlsData = null;
 
-    synchronized (db) { urlsData = db.retrieveHashedDataOfUrls(); }
+    synchronized (db) {
+      urlsData = db.retrieveHashedDataOfUrls();
+    }
 
     synchronized (hM) {
       hM.fillHashedURLs(urlsData);
@@ -200,10 +214,12 @@ public class Crawler implements Runnable {
     List<Document> data = null;
     int count = 0;
 
-    synchronized (db) { data = db.retrieveUrlsInQueue(); }
+    synchronized (db) {
+      data = db.retrieveUrlsInQueue();
+    }
 
     System.out.println("size of retrieved urls that was in queue: " +
-                       data.size());
+        data.size());
 
     for (Document urlData : data) {
       try {
@@ -211,6 +227,7 @@ public class Crawler implements Runnable {
 
         url.setHashedDoc(urlData.getString("hashedDoc"));
         url.setHashedURL(urlData.getString("hashedURL"));
+        url.setRankerId(urlData.getInteger("ranker_id"));
 
         synchronized (qM) {
           qM.push(url);
@@ -229,9 +246,8 @@ public class Crawler implements Runnable {
    * A static function that provides initial seed for the queueManager.
    */
   static public void ProvideSeed(List<Url> urls) {
-    Set<String> seeds =
-        urls.stream().map(Url::getUrlString).collect(Collectors.toSet());
+    Set<String> seeds = urls.stream().map(Url::getUrlString).collect(Collectors.toSet());
     Crawler c = new Crawler();
-    c.HandleHashing(seeds);
+    c.HandleHashing(seeds, -1);
   }
 }
