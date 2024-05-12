@@ -79,7 +79,7 @@ public class DBManager {
       Bson filter = Filters.eq("inQueue", true);
 
       // Create a projection document to specify fields to retrieve
-      Bson projection = fields(include("hashedURL", "hashedDoc", "URL"), excludeId());
+      Bson projection = fields(include("hashedURL", "hashedDoc", "URL", "ranker_id"), excludeId());
 
       // Find documents matching the filter in the docCollection
       FindIterable<Document> matchingUrls = docCollection.find(filter).projection(projection);
@@ -147,33 +147,69 @@ public class DBManager {
   }
 
   /**
-   * takes a value of a certain key and increments the popularity of it.
+   * takes the key of the parents array and append a new parent to it.
    *
-   * @param key   - the key to search on.
-   * @param value - the value to match.
-   * @return boolean - indicating if the popularity incremented or not.
+   * @param key       - the key to search on.
+   * @param value     - the value to match.
+   * @param parent_id - the new parent id to add
+   * @return boolean - indicating if the popularity incremented successfuly or
+   *         not.
    */
-  public boolean incrementPopularity(String key, String value) {
+  public boolean updateParents(String key, String value, int parent_id) {
     try {
-      // Build a filter to find the document with the specified key & value.
-      Document filter = new Document(key, value);
-
-      // Update by incrementing the "popularity" field (atomic operation)
-      Document update = new Document("$inc", new Document("popularity", 1));
+      UpdateResult updateResult = docCollection.updateOne(Filters.eq(key, value),
+          Updates.push("parents", parent_id));
 
       // Update the document, returning true if successful
-      UpdateResult updateResult = docCollection.updateOne(filter, update);
       return updateResult.getModifiedCount() == 1;
 
     } catch (MongoException e) {
-      System.out.println("Error while updating popularity: " + e.getMessage());
+      System.out.println("Error while updating Parents array: " + e.getMessage());
       return false;
+    }
+  }
+
+  /**
+   * getUrlsCount - Returns the number of Urls in the database.
+   * 
+   * @return int - represents number of Urls in the database.
+   */
+  public int getUrlsCount() {
+    try {
+      return (int) docCollection.countDocuments();
+
+    } catch (MongoException e) {
+      System.out.println("Error while getting urls count: " + e.getMessage());
+      return -1;
+    }
+  }
+
+  /**
+   * getParentsArr - returns an array of parents for a certain url.
+   * 
+   * @param ranker_id - the url ranker id.
+   * @return List<Integer> - list of parents ids
+   */
+  public List<Integer> getParentsArr(int ranker_id) {
+    try {
+
+      // Filter the Document I want.
+      Document filter = new Document("ranker_id", ranker_id);
+
+      // Find documents matching the filter in the docCollection
+      FindIterable<Document> matchingUrls = docCollection.find(filter);
+
+      return matchingUrls.first().getList("parents", Integer.class);
+
+    } catch (MongoException e) {
+      System.out.println("Error while getting parents array: " + e.getMessage());
+      return new ArrayList<Integer>();
     }
   }
 
   public String insertDocument(String url, String title, String host,
       String content, String hashedUrl,
-      String hashedDoc) {
+      String hashedDoc, int ranker_id, List<Integer> parents) {
     try {
       // Check for valid URL
       new URL(url).toURI();
@@ -185,9 +221,10 @@ public class DBManager {
           .append("content", content)
           .append("hashedURL", hashedUrl)
           .append("hashedDoc", hashedDoc)
-          .append("popularity", 1)
           .append("indexed", false)
-          .append("inQueue", true);
+          .append("inQueue", true)
+          .append("ranker_id", ranker_id)
+          .append("parents", parents);
 
       String insertedId = docCollection.insertOne(document)
           .getInsertedId()
@@ -212,14 +249,26 @@ public class DBManager {
     try {
 
       for (String token : tokens.keySet()) {
-        Document newDoc = new Document("_id", new ObjectId(docID))
-            .append("TF", tokens.get(token).count)
-            .append("position", tokens.get(token).position);
+        Document result = invertedCollection.find(new Document("token", token)).first();
+        if (result == null) {
 
-        invertedCollection.updateOne(
-            Filters.eq("token", token),
-            Updates.addToSet("docs", newDoc),
-            new UpdateOptions().upsert(true));
+          List<Document> docs = new ArrayList<>();
+          docs.add(new Document("_id", new ObjectId(docID))
+              .append("TF", tokens.get(token).count)
+              .append("position", tokens.get(token).position));
+
+          Document document = new Document().append("token", token).append("docs", docs);
+
+          invertedCollection.insertOne(document);
+        } else {
+
+          Document newDoc = new Document("_id", new ObjectId(docID))
+              .append("TF", tokens.get(token).count)
+              .append("position", tokens.get(token).position);
+
+          invertedCollection.updateOne(Filters.eq("token", token),
+              Updates.push("docs", newDoc));
+        }
       }
 
       // update document to be indexed
@@ -308,6 +357,27 @@ public class DBManager {
       System.out.println("Error occurred while getting indices: " +
           e.getMessage());
       return null;
+    }
+  }
+
+  //! Not working
+  public List<Document> getCommonDocs(List<String> searchTokens){
+    try {
+      Document query = new Document("$and", Arrays.asList(
+      new Document("token",  new Document("docs" , new Document("$exists", true).append("$all", Arrays.asList(searchTokens))))));
+
+      System.out.println(query);
+      List<Document> docs = invertedCollection.find(query).into(new ArrayList<>());
+      
+      for(Document doc:docs){
+        System.out.println(doc);
+      }
+      return docs;
+
+    } catch (MongoException e) {
+        System.out.println("Error occurred while getting docs: " +
+        e.getMessage());
+        return null;
     }
   }
 

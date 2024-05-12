@@ -32,4 +32,4 @@ Please check the following documents before contributing:
 
 - [Git flow](/docs/conventions/git-flow.md)
 - [Java setup](/docs/conventions/java-env.md)
-- [monogo setup])(/docs/conventions/mongo.md)
+- [monogo setup](/docs/conventions/mongo.md)
