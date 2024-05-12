@@ -360,6 +360,25 @@ public class DBManager {
     }
   }
 
+  public double getDocumentFromInverted(String token, ObjectId docID) {
+    try {
+      Document query = new Document("token", token).append("docs._id", docID);
+
+      Document result = invertedCollection.find(query)
+          .projection(new Document("docs.$", 1)).first();
+
+      if (result != null)
+        return result.getList("docs", Document.class).get(0).getDouble("TF");
+      ;
+      return 0;
+    } catch (MongoException e) {
+
+      System.out.println("Error occurred while getting indices: " +
+          e.getMessage());
+      return 0;
+    }
+  }
+
   public List<ObjectId> getDocs(String[] tokens) {
     List<ObjectId> docIds = new ArrayList<>();
     List<String> tokenList = Arrays.asList(tokens);
