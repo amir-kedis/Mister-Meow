@@ -33,10 +33,10 @@ public class PhraseRanker extends Ranker {
     private List<Document> getMatchingDocs(String query) {
 
         List<String> searchTokens = tokenizer.tokenizeString(query);
+        System.out.println(searchTokens);
 
-        // List<Document> docs = db.getInvertedIndex(firstToken).getList("docs",
-        // Document.class);
         List<Document> docs = getCommonDocs(searchTokens);
+        
         List<Document> finalDocs = new ArrayList<>();
 
         for (Document doc : docs) {
@@ -64,15 +64,30 @@ public class PhraseRanker extends Ranker {
         if (searchTokens.size() == 0)
             return new ArrayList<>();
 
-        List<Document> docs = db.getInvertedIndex(searchTokens.get(0)).getList("docs", Document.class);
+        // getting the first token present in db
+        int ind = 0; 
+        Document invertedInd = db.getInvertedIndex(searchTokens.get(0));
+        ind++;
+        
+        while(invertedInd == null && ind< searchTokens.size()){
+            invertedInd = db.getInvertedIndex(searchTokens.get(ind));
+            ind++;
+        }
+        
+        if(invertedInd == null)
+            return new ArrayList<>();
+
+
+        List<Document> docs = invertedInd.getList("docs", Document.class);
         List<ObjectId> docsId = new ArrayList<>();
 
         for (Document doc : docs) {
             docsId.add(doc.getObjectId("_id"));
         }
 
-        for (int i = 1; i < searchTokens.size(); i++) {
-            Document invertedInd = db.getInvertedIndex(searchTokens.get(i));
+        for (int i = ind; i < searchTokens.size(); i++) {
+            
+            invertedInd = db.getInvertedIndex(searchTokens.get(i));
             if (invertedInd != null) {
 
                 List<Document> currDocs = invertedInd.getList("docs", Document.class);

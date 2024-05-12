@@ -5,6 +5,9 @@ import java.util.*;
 import java.lang.Math;
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
+import org.bson.Document;
+
+import com.google.common.collect.Table;
 
 public class Ranker {
 
@@ -149,5 +152,25 @@ public class Ranker {
                 graph[i][j] /= sum;
         }
     }
+
+    public List<Double> calculateRelevance(List<Document> docs , List<String> searchTokens){
+        List<Double> TFs = new ArrayList<>(docs.size());
+        List<Double> idf = new ArrayList<>(docs.size());
+        List<Double> relevance = new ArrayList<>(docs.size());
+       
+        for(int i = 0 ; i<docs.size() ; i++){
+            TFs.set(i , docs.get(i).getDouble("TF")); 
+            
+        }   
+        // TODO: Complete function implementation
+        return relevance;
+    }
+
+    public double getTF(Document doc, String token){
+    //    List<Document> allTokenDocs = db.getInvertedIndex(token).getList("docs", Document.class);
+       List<Document> allTokenDocs = 
+
+    }
+
 
 }
