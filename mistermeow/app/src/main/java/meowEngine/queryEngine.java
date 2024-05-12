@@ -3,6 +3,8 @@ package meowEngine;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.*;
 
@@ -10,7 +12,6 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import meowdbmanager.DBManager;
-import meowindexer.Tokenizer;
 
 /*
  * get search query from frontend
@@ -44,8 +45,11 @@ import meowindexer.Tokenizer;
 public class queryEngine {
   private DBManager dbManager = new DBManager();
   private List<ObjectId> docs = new ArrayList<>();
+  private String currentQuery = "";
   private boolean isPhraseMatching = false, isFirstTime = true;
+  private String[] phrases = new String[3];
   private int[] operators = new int[2]; // 0: None, 1: AND, 2: OR, 3: NOT
+  private final int numOfDocsInPage = 20;
 
   @GET
   @Path("/suggestions")
@@ -61,37 +65,48 @@ public class queryEngine {
       @PathParam("q") String query,
       @PathParam("p") int page) {
 
+    if (!query.equals(currentQuery))
+      isFirstTime = true;
+
     if (isFirstTime) {
       parse(query);
       dbManager.insertSuggestion(query);
       docs = rankDocs(query.toLowerCase().split("\\s+"));
       isFirstTime = false;
+      currentQuery = query;
     }
 
-    int startIndex = page * 20;
-    int endIndex = Math.min(startIndex + 20, docs.size());
+    int startIndex = page * numOfDocsInPage;
+    int endIndex = Math.min(startIndex + numOfDocsInPage, docs.size());
     return getResults(docs.subList(startIndex, endIndex));
   }
 
   private void parse(String query) {
     isPhraseMatching = false;
     operators[0] = operators[1] = 0;
-    String operatorString[] = { "AND", "OR", "NOT" };
+    phrases[0] = phrases[1] = phrases[2] = null;
 
-    if (query.charAt(0) == '"' && query.charAt(query.length() - 1) == '"')
-      isPhraseMatching = true;
+    Matcher phraseMatch = Pattern.compile("\"[^\"]+\"").matcher(query);
+    Matcher operatorMatch = Pattern.compile("\"\\s*(AND|OR|NOT)\\s*\"").matcher(query);
 
-    int i = 1;
-    for (String operator : operatorString) {
-      int index = query.indexOf(operator);
-      if (index != -1) {
-        if (operators[0] == 0)
-          operators[0] = i;
-        else
-          operators[1] = i;
-      }
-      i++;
+    int i = 0;
+    while (phraseMatch.find()) {
+      String phrase = phraseMatch.group().replaceAll("^\"|\"$", "").trim();
+      System.out.println(phrase);
+      phrases[i++] = phrase;
     }
+
+    i = 0;
+    while (operatorMatch.find()) {
+      String operator = operatorMatch.group().replaceAll("^\"|\"$", "").trim();
+      System.out.println(operator);
+      operators[i++] = operator.equals("AND") ? 1
+          : operator.equals("OR") ? 2
+              : 3;
+    }
+
+    isPhraseMatching = phrases[0] != null;
+    operators[0] = operators[1] = 0;
   }
 
   private List<Document> getResults(List<ObjectId> docs) {
@@ -113,6 +128,6 @@ public class queryEngine {
   }
 
   private List<ObjectId> rankDocs(String[] tokens) {
-    return null;
+    return dbManager.getDocs(tokens);
   }
 }

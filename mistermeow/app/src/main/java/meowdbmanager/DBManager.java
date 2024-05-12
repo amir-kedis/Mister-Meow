@@ -34,8 +34,8 @@ public class DBManager {
     invertedCollection = DB.getCollection("InvertedIndex");
     docCollection = DB.getCollection("Documents");
     queryCollection = DB.getCollection("Queries");
-    invertedCollection.createIndex(new Document("token", 1), new IndexOptions().unique(true));
-    queryCollection.createIndex(new Document("query", 1), new IndexOptions().unique(true));
+    invertedCollection.createIndex(new Document("token", 1));
+    queryCollection.createIndex(new Document("query", 1));
   }
 
   /**
@@ -152,7 +152,7 @@ public class DBManager {
    * @param key       - the key to search on.
    * @param value     - the value to match.
    * @param parent_id - the new parent id to add
-   * @return boolean - indicating if the popularity incremented successfuly or
+   * @return boolean - indicating if the popularity incremented successfully or
    *         not.
    */
   public boolean updateParents(String key, String value, int parent_id) {
@@ -360,24 +360,28 @@ public class DBManager {
     }
   }
 
-  //! Not working
-  public List<Document> getCommonDocs(List<String> searchTokens){
+  public List<ObjectId> getDocs(String[] tokens) {
+    List<ObjectId> docIds = new ArrayList<>();
+    List<String> tokenList = Arrays.asList(tokens);
+
     try {
-      Document query = new Document("$and", Arrays.asList(
-      new Document("token",  new Document("docs" , new Document("$exists", true).append("$all", Arrays.asList(searchTokens))))));
+      List<Document> pipeline = new ArrayList<>();
+      pipeline.add(new Document("$match", new Document("token", new Document("$in", tokenList))));
+      pipeline.add(new Document("$unwind", "$docs"));
+      pipeline.add(new Document("$project", new Document("_id", "$docs._id")));
 
-      System.out.println(query);
-      List<Document> docs = invertedCollection.find(query).into(new ArrayList<>());
-      
-      for(Document doc:docs){
-        System.out.println(doc);
+      List<Document> aggregationResult = invertedCollection.aggregate(pipeline).into(new ArrayList<>());
+      for (Document doc : aggregationResult) {
+        ObjectId docId = doc.getObjectId("_id");
+        docIds.add(docId);
       }
-      return docs;
 
+      return docIds;
     } catch (MongoException e) {
-        System.out.println("Error occurred while getting docs: " +
-        e.getMessage());
-        return null;
+
+      System.out.println("Error occurred while getting docs: " +
+          e.getMessage());
+      return null;
     }
   }
 
