@@ -1,14 +1,24 @@
+
 package meowranker;
 
 import java.util.*;
 import java.lang.Math;
+import meowdbmanager.DBManager;
 
 public class Ranker {
-    
-    public static double[] getPopularity(double[][] M , int UrlsCount){
 
-        //TODO: implement logic 
-        
+    public DBManager db;
+
+    public Ranker(){
+        db = new DBManager();
+    }
+
+    // The function takes graph of links between documents
+    // where edge from doc1 to doc2 is representing by adding
+    // 1/(outgoing urls from doc1) in the cell M[doc2][doc1]
+    // resulting in matrix with sum of it's columns always = 1
+    public double[] getPopularity(double[][] M , int UrlsCount){
+
         double d =0.85;
         double[][] M_hat = new double[UrlsCount][UrlsCount];
         for(int i =0 ; i<UrlsCount ; i++){
@@ -29,26 +39,32 @@ public class Ranker {
             prevRank=currRank;
             currRank = calculateCurrRank(prevRank, UrlsCount, d, M_hat);
         }
+        
+        //normalizing the final array
+        double norm = Norm(currRank , UrlsCount);
 
+        for(int i  = 0 ; i<UrlsCount; i++){
+            currRank[i]/=norm;
+        }
         return currRank;
     }   
 
-    public static double[] calculateCurrRank(double[] prevRank  , int UrlsCount , double d , double[][] M_hat){
+    public double[] calculateCurrRank(double[] prevRank  , int UrlsCount , double d , double[][] M_hat){
         
         double[] currRank = new double[UrlsCount];
     
         for(int i = 0 ; i<UrlsCount ; i++){
             double val = 0;
             for(int j=0 ; j<UrlsCount ; j++){
-                val+=M_hat[i][j]*prevRank[j]+(1-d);
+                val+=M_hat[i][j]*prevRank[j];
             }
-            currRank[i] = val;
+            currRank[i] = val+(1-d);
         }
 
         return currRank;
     }
 
-    public static double Norm(double[] vector , int size){
+    public double Norm(double[] vector , int size){
         double norm = 0;
 
         for(int i =0 ; i<size ; i++){
