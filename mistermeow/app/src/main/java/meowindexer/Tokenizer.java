@@ -119,7 +119,7 @@ public class Tokenizer {
    * @param text: String to tokenize
    * @return List of tokens
    */
-  private List<String> tokenizeString(String text) {
+  public List<String> tokenizeString(String text) {
     List<String> tokens = new ArrayList<String>();
     PorterStemmer stemmer = new PorterStemmer();
 
