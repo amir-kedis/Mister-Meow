@@ -60,7 +60,7 @@ public class Main {
     Crawler.ProvideSeed(urls);
 
     List<Thread> threads = new ArrayList<>();
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 64; i++) {
       Thread t = new Thread(new Crawler());
       threads.add(t);
       t.start();

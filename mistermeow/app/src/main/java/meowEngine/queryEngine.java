@@ -5,13 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.ws.rs.*;
-
+import meowdbmanager.DBManager;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-
-import meowdbmanager.DBManager;
+import org.jsoup.Jsoup;
 
 /*
  * get search query from frontend
@@ -22,7 +20,7 @@ import meowdbmanager.DBManager;
  * get pageination
  * return query tokens, numOfdocs, suggestions, search operation time
  * return snippets, url, website title, page title of every doc
- * 
+ *
  * separate functionalities:
  * 1. AND/OR/NOT
  * 2. Phrase search
@@ -50,19 +48,18 @@ public class queryEngine {
   private String[] phrases = new String[3];
   private int[] operators = new int[2]; // 0: None, 1: AND, 2: OR, 3: NOT
   private final int numOfDocsInPage = 20;
+  private int windowCharSize = 100;
 
   @GET
   @Path("/suggestions")
-  public List<String> getSuggestions(
-      @QueryParam("query") String query) {
+  public List<String> getSuggestions(@QueryParam("query") String query) {
 
     return dbManager.getSuggestions(query, 10);
   }
 
   @POST
   @Path("/search/{q}/{p}")
-  public List<Document> searchQuery(
-      @PathParam("q") String query,
+  public List<Document> searchQuery(@PathParam("q") String query,
       @PathParam("p") int page) {
 
     if (!query.equals(currentQuery))
@@ -123,8 +120,30 @@ public class queryEngine {
     return "Results Info";
   }
 
-  private String getSnippet(String doc, HashSet<String> tokens) {
-    return "Snippet";
+  public String getSnippet(String doc, HashSet<String> tokens) {
+    String textContent = Jsoup.parse(doc).text();
+
+    for (String token : tokens) {
+      if (textContent.contains(token)) {
+        int index = textContent.indexOf(token);
+        return textContent.substring(index - windowCharSize,
+            index + windowCharSize);
+      }
+    }
+
+    return "No Snippet Found";
+  }
+
+  public String getSnippet(String doc, String phrase) {
+    String textContent = Jsoup.parse(doc).text();
+
+    if (textContent.contains(phrase)) {
+      int index = textContent.indexOf(phrase);
+      return textContent.substring(index - windowCharSize,
+          index + windowCharSize);
+    }
+
+    return "No Snippet Found";
   }
 
   private List<ObjectId> rankDocs(String[] tokens) {
