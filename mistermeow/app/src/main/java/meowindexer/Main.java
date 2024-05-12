@@ -69,11 +69,11 @@ public class Main {
 
   public static void printPatchNumber(int patchNumber) {
     System.out.println(ANSI_GREEN +
-        "==============================" + ANSI_RESET);
+                       "==============================" + ANSI_RESET);
     System.out.println(ANSI_GREEN + "|| Starting patch number: " + patchNumber +
                        " ||" + ANSI_RESET);
     System.out.println(ANSI_GREEN +
-        "==============================" + ANSI_RESET);
+                       "==============================" + ANSI_RESET);
   }
 
   public static void printFinished() {
@@ -82,6 +82,6 @@ public class Main {
     System.out.println(ANSI_RED + "|| Finished indexing all docs!  ||" +
                        ANSI_RESET);
     System.out.println(ANSI_RED +
-        "====================================" + ANSI_RESET);
+                       "====================================" + ANSI_RESET);
   }
 }
