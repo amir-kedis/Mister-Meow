@@ -44,6 +44,13 @@ sourceSets {
   }
 }
 
+task runEngine(type: JavaExec) {
+    // Define the main class for the application.
+    main = 'meowEngine.Main'
+    // Define the classpath for the application.
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 task runIndexer(type: JavaExec) {
     // Define the main class for the application.
     main = 'meowindexer.Main'
@@ -77,6 +84,11 @@ task runRanker(type: JavaExec) {
     main = 'meowranker.Main'
     // Define the classpath for the application.
     classpath = sourceSets.main.runtimeClasspath
+}
+
+tasks.register('engine') {
+    group = "mistermeow run"
+    dependsOn runEngine
 }
 
 tasks.register('ranker') {
