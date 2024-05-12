@@ -8,6 +8,9 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    // id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
 }
 
 apply plugin: 'eclipse'
@@ -18,14 +21,19 @@ repositories {
     mavenCentral()
 }
 
+group = 'com.mistermeow'
+
 dependencies {
     // This dependency is used by the application.
     implementation libs.guava
     implementation 'javax:javaee-api:8.0'
     implementation 'org.jsoup:jsoup:1.17.2'
     implementation group: 'org.apache.opennlp', name: 'opennlp-tools', version: '2.3.2'
-    implementation 'org.mongodb:mongodb-driver-sync:5.0.1'
+    // implementation 'org.mongodb:mongodb-driver-sync:5.0.1'
     implementation 'commons-codec:commons-codec:1.13'
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.25.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -33,6 +41,7 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
+    sourceCompatibility = '17'
 }
 
 
@@ -118,5 +127,5 @@ tasks.register('engine') {
 
 application {
     // Define the main class for the application.
-    mainClass = 'meowindexer.Main'
+    mainClass = 'meowEngine.Main'
 }

@@ -1,21 +1,12 @@
 package meowEngine;
 
-import java.util.HashSet;
-import meowdbmanager.DBManager;
+import meowEngine.QueryEngineController;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
 public class Main {
   public static void main(String[] args) {
-    RestApplication api = new RestApplication();
-    queryEngine qe = new queryEngine();
-    DBManager dbManager = new DBManager();
-
-    String doc = dbManager.getUrlDocument("https://en.wikipedia.org/wiki/Cat");
-    HashSet<String> query = new HashSet<String>();
-    query.add("cat");
-    query.add("kitten");
-
-    String phrase = "cats can";
-    System.out.println(qe.getSnippet(doc, query));
-    System.out.println(qe.getSnippet(doc, phrase));
+    SpringApplication.run(Main.class, args);
   }
 }
