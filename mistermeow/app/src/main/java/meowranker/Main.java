@@ -5,8 +5,8 @@ import java.util.*;
 import org.bson.types.ObjectId;
 
 public class Main {
-    public static void main(String[] argv){
-        
+    public static void main(String[] argv) {
+
         // int UrlCount = 4;
         // double[][] M = new double[UrlCount][];
 
@@ -19,7 +19,7 @@ public class Main {
         // double[] r = ranker.getPopularity(M , UrlCount);
 
         // for(int i=0 ; i<UrlCount; i++)
-        //     System.out.print(r[i]+ " ");
+        // System.out.print(r[i]+ " ");
 
         // testing phrase matching
         PhraseRanker r = new PhraseRanker();
