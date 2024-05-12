@@ -5,62 +5,49 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.ws.rs.*;
-import meowdbmanager.DBManager;
+
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
+import org.springframework.web.bind.annotation.*;
 
-/*
- * get search query from frontend
- * tokenize and do all other necessary processing
- * search in the indexer
- * get all docs that match the query
- * use ranker + prioritize actual token over stemmed token
- * get pageination
- * return query tokens, numOfdocs, suggestions, search operation time
- * return snippets, url, website title, page title of every doc
- *
- * separate functionalities:
- * 1. AND/OR/NOT
- * 2. Phrase search
- *
- * TODO:
- * 1. create the interface of the API
- * 2. get suggestions -> Endpoint (GET /suggestions)
- * 3. post search query -> Endpoint (POST /search)
- * 4. post pagination -> Endpoint (POST /page)
- * 6. get all results metadata -> middleware
- * 7. get all results info -> middleware
- * 8. preprocess the query -> middleware
- * 9. search in the indexer and get all docs -> middleware
- * 10. rank the docs -> middleware
- * 11. Save all docs in a list -> middleware
- *
- */
+import meowdbmanager.DBManager;
 
-@Path("/")
-public class queryEngine {
-  private DBManager dbManager = new DBManager();
-  private List<ObjectId> docs = new ArrayList<>();
-  private String currentQuery = "";
-  private boolean isPhraseMatching = false, isFirstTime = true;
-  private String[] phrases = new String[3];
-  private int[] operators = new int[2]; // 0: None, 1: AND, 2: OR, 3: NOT
-  private final int numOfDocsInPage = 20;
-  private int windowCharSize = 100;
+@RestController
+@RequestMapping("/")
+public class QueryEngineController {
+  private DBManager dbManager;
+  private List<String> docs;
+  private String currentQuery;
+  private boolean isPhraseMatching, isFirstTime;
+  private String[] phrases;
+  private int[] operators; // 0: None, 1: AND, 2: OR, 3: NOT
+  private final int numOfDocsInPage = 20, windowCharSize = 100;
 
-  @GET
-  @Path("/suggestions")
-  public List<String> getSuggestions(@QueryParam("query") String query) {
-
-    return dbManager.getSuggestions(query, 10);
+  public QueryEngineController() {
+    dbManager = new DBManager();
+    docs = new ArrayList<>();
+    currentQuery = "";
+    isPhraseMatching = false;
+    isFirstTime = true;
+    phrases = new String[3];
+    operators = new int[2];
   }
 
-  @POST
-  @Path("/search/{q}/{p}")
-  public List<Document> searchQuery(@PathParam("q") String query,
-      @PathParam("p") int page) {
+  @GetMapping("/")
+  public String sayHello() {
+    return "Hello World!";
+  }
+
+  @GetMapping("/suggestions")
+  public Document getSuggestions(@RequestParam("query") String query) {
+    return new Document("data", dbManager.getSuggestions(query, 10));
+  }
+
+  @GetMapping("/search")
+  public Document searchQuery(
+      @RequestParam("query") String query,
+      @RequestParam("page") int page) {
 
     if (!query.equals(currentQuery))
       isFirstTime = true;
@@ -75,7 +62,8 @@ public class queryEngine {
 
     int startIndex = page * numOfDocsInPage;
     int endIndex = Math.min(startIndex + numOfDocsInPage, docs.size());
-    return getResults(docs.subList(startIndex, endIndex));
+    List<String> subList = docs.subList(startIndex, endIndex);
+    return new Document("data", subList);
   }
 
   private void parse(String query) {
@@ -146,7 +134,7 @@ public class queryEngine {
     return "No Snippet Found";
   }
 
-  private List<ObjectId> rankDocs(String[] tokens) {
+  private List<String> rankDocs(String[] tokens) {
     return dbManager.getDocs(tokens);
   }
 }

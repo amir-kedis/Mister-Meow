@@ -3,7 +3,7 @@
 - This is the preferred way
 
 ```
-grade bootRun
+gradle bootRun
 ```
 
 - but you could also run this (not recommended)
