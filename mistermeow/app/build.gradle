@@ -86,11 +86,6 @@ task runRanker(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-tasks.register('engine') {
-    group = "mistermeow run"
-    dependsOn runEngine
-}
-
 tasks.register('ranker') {
     group = "mistermeow run"
     dependsOn runRanker
@@ -116,6 +111,10 @@ tasks.register('dbmanager') {
     dependsOn runDBManager
 }
 
+tasks.register('engine') {
+    group = "mistermeow run"
+    dependsOn runEngine
+}
 
 application {
     // Define the main class for the application.

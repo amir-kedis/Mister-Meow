@@ -1,4 +1,3 @@
-
 package meowEngine;
 
 import java.util.HashSet;
@@ -6,6 +5,7 @@ import meowdbmanager.DBManager;
 
 public class Main {
   public static void main(String[] args) {
+    RestApplication api = new RestApplication();
     queryEngine qe = new queryEngine();
     DBManager dbManager = new DBManager();
 
