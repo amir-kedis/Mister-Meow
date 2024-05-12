@@ -3,17 +3,13 @@ package meowdbmanager;
 import static com.mongodb.client.model.Projections.*;
 
 import com.mongodb.MongoException;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.CreateCollectionOptions;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.*;
+import com.mongodb.client.model.*;
 import com.mongodb.client.result.UpdateResult;
 import java.net.*;
 import java.util.*;
+import java.util.regex.Pattern;
+
 import meowindexer.Tokenizer.*;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -24,6 +20,7 @@ public class DBManager {
   private MongoDatabase DB;
   private MongoCollection<Document> invertedCollection;
   private MongoCollection<Document> docCollection;
+  private MongoCollection<Document> queryCollection;
 
   public DBManager() {
     mongoClient = MongoClients.create("mongodb://localhost:27017");
@@ -32,10 +29,13 @@ public class DBManager {
     CreateCollectionOptions options = new CreateCollectionOptions().capped(false);
     DB.createCollection("Documents", options);
     DB.createCollection("InvertedIndex", options);
+    DB.createCollection("Queries", options);
 
     invertedCollection = DB.getCollection("InvertedIndex");
     docCollection = DB.getCollection("Documents");
-    invertedCollection.createIndex(new Document("token", 1));
+    queryCollection = DB.getCollection("Queries");
+    invertedCollection.createIndex(new Document("token", 1), new IndexOptions().unique(true));
+    queryCollection.createIndex(new Document("query", 1), new IndexOptions().unique(true));
   }
 
   /**
@@ -249,7 +249,6 @@ public class DBManager {
     try {
 
       for (String token : tokens.keySet()) {
-
         Document result = invertedCollection.find(new Document("token", token)).first();
         if (result == null) {
 
@@ -280,6 +279,37 @@ public class DBManager {
 
       System.out.println("Error occurred while insertion: " + e.getMessage());
       return false;
+    }
+  }
+
+  public boolean insertSuggestion(String query) {
+    try {
+      queryCollection.insertOne(new Document("query", query));
+      return true;
+    } catch (MongoException e) {
+      if (e.getCode() == 11000)
+        return true;
+      System.out.println("Error occurred while insertion: " + e.getMessage());
+      return false;
+    }
+  }
+
+  public List<String> getSuggestions(String query, int limit) {
+    List<String> matchingSuggestions = new ArrayList<>();
+
+    try {
+
+      Document docQuery = new Document("query", Pattern.compile("^" + Pattern.quote(query), Pattern.CASE_INSENSITIVE));
+      queryCollection.find(docQuery).limit(limit).forEach(doc -> {
+        matchingSuggestions.add(doc.getString("query"));
+      });
+
+      return matchingSuggestions;
+    } catch (MongoException e) {
+
+      System.out.println("Error occurred while getting suggestions: " +
+          e.getMessage());
+      return null;
     }
   }
 

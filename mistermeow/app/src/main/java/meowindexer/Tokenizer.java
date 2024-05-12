@@ -55,8 +55,30 @@ public class Tokenizer {
    * Constructor for the tokenizer: loads
    */
   public Tokenizer() {
-    stopWords = new HashSet<String>();
-    loadStopWords("stopwords-en.txt");
+    stopWords = loadStopWords("stopwords-en.txt");
+  }
+
+  /**
+   * Load stop words from a file (stopwords-en.txt)
+   *
+   * @param filename: Name of the file containing stop words
+   * @return HashSet of stop words
+   */
+  public static HashSet<String> loadStopWords(String filename) {
+    HashSet<String> stopWords = new HashSet<String>();
+    try {
+      // NOTE: root path is src/meowindexer/app/. everything is relative to this
+      BufferedReader reader = new BufferedReader(new FileReader("../data/" + filename));
+      String line;
+      while ((line = reader.readLine()) != null) {
+        stopWords.add(line.trim());
+      }
+      reader.close();
+      return stopWords;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   /**
@@ -88,26 +110,6 @@ public class Tokenizer {
     fillPosistions(tokenMap, doc);
 
     return tokenMap;
-  }
-
-  /**
-   * Load stop words from a file (stopwords-en.txt)
-   *
-   * @param filename: Name of the file containing stop words
-   */
-  private void loadStopWords(String filename) {
-    try {
-      // NOTE: root path is src/meowindexer/app/. everything is relative to this
-      // path
-      BufferedReader reader = new BufferedReader(new FileReader("../data/" + filename));
-      String line;
-      while ((line = reader.readLine()) != null) {
-        stopWords.add(line.trim());
-      }
-      reader.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 
   /**

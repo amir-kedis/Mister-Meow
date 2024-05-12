@@ -21,6 +21,7 @@ repositories {
 dependencies {
     // This dependency is used by the application.
     implementation libs.guava
+    implementation 'javax:javaee-api:8.0'
     implementation 'org.jsoup:jsoup:1.17.2'
     implementation group: 'org.apache.opennlp', name: 'opennlp-tools', version: '2.3.2'
     implementation 'org.mongodb:mongodb-driver-sync:5.0.1'
@@ -38,7 +39,7 @@ java {
 sourceSets {
   main {
     java {
-      srcDirs 'src/main/java/meowindexer', 'src/main/java/meowcrawler', 'src/main/java/meowdbmanager', 'src/main/java/meowranker'
+      srcDirs 'src/main/java/meowindexer', 'src/main/java/meowcrawler', 'src/main/java/meowdbmanager', 'src/main/java/meowranker', 'src/main/java/meowEngine'
     }
   }
 }
@@ -78,15 +79,6 @@ task runRanker(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-task runDBInit(type: Exec) {
-    commandLine '../database/DBInit.sh'
-}
-
-task runDBCleanup(type: Exec) {
-    commandLine '../database/DBCleanup.sh'
-}
-
-
 tasks.register('ranker') {
     group = "mistermeow run"
     dependsOn runRanker
@@ -95,16 +87,6 @@ tasks.register('ranker') {
 tasks.register('queueManager') {
     group = "mistermeow run"
     dependsOn runQueueManager
-}
-
-tasks.register('dbimport') {
-    group = "mistermeow db"
-    dependsOn runDBInit
-}
-
-tasks.register('dbexport') {
-    group = "mistermeow db"
-    dependsOn runDBCleanup
 }
 
 tasks.register('crawl') {
