@@ -5,6 +5,7 @@ import java.util.*;
 import java.lang.Math;
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
+import org.bson.types.ObjectId;
 import org.bson.Document;
 
 import com.google.common.collect.Table;
@@ -153,24 +154,47 @@ public class Ranker {
         }
     }
 
-    public List<Double> calculateRelevance(List<Document> docs , List<String> searchTokens){
-        List<Double> TFs = new ArrayList<>(docs.size());
-        List<Double> idf = new ArrayList<>(docs.size());
+    public List<Double> calculateRelevance(List<Document> docs, List<String> searchTokens) {
         List<Double> relevance = new ArrayList<>(docs.size());
-       
-        for(int i = 0 ; i<docs.size() ; i++){
-            TFs.set(i , docs.get(i).getDouble("TF")); 
-            
-        }   
-        // TODO: Complete function implementation
+
+        for (int i = 0; i < docs.size(); i++) {
+            double val = 0;
+            for (String token : searchTokens) {
+                val += getTF(docs.get(i).getObjectId("_id"), token) * getIDF(token);
+            }
+            relevance.set(i, val);
+
+        }
+
         return relevance;
     }
 
-    public double getTF(Document doc, String token){
-    //    List<Document> allTokenDocs = db.getInvertedIndex(token).getList("docs", Document.class);
-       List<Document> allTokenDocs = 
-
+    public double getIDF(String token) {
+        double df;
+        Document invertedInd = db.getInvertedIndex(token);
+        
+        if (invertedInd == null)                            //  Handling tokens that are not in any documnets
+            return 0;
+        
+        df = (double) db.getInvertedIndex(token).getInteger("DF");
+        return Math.log((double) db.getUrlsCount() / df);
     }
 
+    public double getTF(ObjectId docId, String token) {
+
+        double d = 5;
+        return d;
+    }
+
+    public void testTokenDocCount(List<String> searchTokens) {
+        for (String token : searchTokens) {
+            Document invertedInd = db.getInvertedIndex(token);
+            if (invertedInd == null)
+                System.out.println(0);
+            else
+                System.out.println((double) invertedInd.getInteger("DF"));
+        }
+
+    }
 
 }

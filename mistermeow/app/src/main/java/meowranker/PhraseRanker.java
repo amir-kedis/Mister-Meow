@@ -14,26 +14,28 @@ public class PhraseRanker extends Ranker {
     }
 
     // TODO: change function return type
-    public List<Document> rank(String query) {
+    public void rank(String query) {
         // TODO:Call function to construct M matrix required to calculate popularity
         // TODO: Call function getPopularity()
 
-        List<Document> matchedDocs = getMatchingDocs(query);
-
-        System.out.println(matchedDocs.size());
-
-        for (Document doc : matchedDocs) {
-            System.out.println(doc.getString("URL"));
-        }
-
-        // TODO: call function sort by higher rank
-        return matchedDocs;
-    }
-
-    private List<Document> getMatchingDocs(String query) {
 
         List<String> searchTokens = tokenizer.tokenizeString(query);
         System.out.println(searchTokens);
+
+        this.testTokenDocCount(searchTokens);
+        // List<Document> matchedDocs = getMatchingDocs(searchTokens, query);
+
+        // System.out.println(matchedDocs.size());
+
+        // for (Document doc : matchedDocs) {
+        //     System.out.println(doc.getString("URL"));
+        // }
+
+        // TODO: call function sort by higher rank
+        // return matchedDocs;
+    }
+
+    private List<Document> getMatchingDocs(List<String> searchTokens , String query) {
 
         List<Document> docs = getCommonDocs(searchTokens);
         
