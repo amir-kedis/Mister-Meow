@@ -202,6 +202,8 @@ public class Crawler implements Runnable {
       hM.fillHashedURLs(urlsData);
       hM.fillHashedDocs(urlsData);
     }
+
+    rankerIndex = urlsData.size();
   }
 
   /**
