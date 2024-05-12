@@ -87,7 +87,7 @@ public class Ranker {
     public double[][] constructUrlsGraph() {
         // Number of nodes in graph is number of urls in database.
         int nodesNum = db.getUrlsCount();
-
+        System.out.println(nodesNum);
         // Create a 2D array filled with 0s initialiy.
         double[][] graph = new double[nodesNum][nodesNum];
 

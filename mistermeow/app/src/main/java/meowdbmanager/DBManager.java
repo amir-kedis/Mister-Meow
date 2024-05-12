@@ -34,7 +34,8 @@ public class DBManager {
     invertedCollection = DB.getCollection("InvertedIndex");
     docCollection = DB.getCollection("Documents");
     queryCollection = DB.getCollection("Queries");
-    invertedCollection.createIndex(new Document("token", 1), new IndexOptions().unique(true));
+
+    invertedCollection.createIndex(new Document("token", 1));
     queryCollection.createIndex(new Document("query", 1), new IndexOptions().unique(true));
   }
 
