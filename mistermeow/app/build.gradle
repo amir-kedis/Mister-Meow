@@ -8,7 +8,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
-    // id 'java'
+    id 'java'
     id 'org.springframework.boot' version '3.2.5'
     id 'io.spring.dependency-management' version '1.1.4'
 }
@@ -29,7 +29,6 @@ dependencies {
     implementation 'javax:javaee-api:8.0'
     implementation 'org.jsoup:jsoup:1.17.2'
     implementation group: 'org.apache.opennlp', name: 'opennlp-tools', version: '2.3.2'
-    // implementation 'org.mongodb:mongodb-driver-sync:5.0.1'
     implementation 'commons-codec:commons-codec:1.13'
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.25.1'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'

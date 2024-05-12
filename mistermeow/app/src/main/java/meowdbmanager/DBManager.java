@@ -34,8 +34,8 @@ public class DBManager {
     invertedCollection = DB.getCollection("InvertedIndex");
     docCollection = DB.getCollection("Documents");
     queryCollection = DB.getCollection("Queries");
-    invertedCollection.createIndex(new Document("token", 1));
-    queryCollection.createIndex(new Document("query", 1));
+    invertedCollection.createIndex(new Document("token", 1), new IndexOptions().unique(true));
+    queryCollection.createIndex(new Document("query", 1), new IndexOptions().unique(true));
   }
 
   /**
@@ -249,26 +249,14 @@ public class DBManager {
     try {
 
       for (String token : tokens.keySet()) {
-        Document result = invertedCollection.find(new Document("token", token)).first();
-        if (result == null) {
+        Document newDoc = new Document("_id", new ObjectId(docID))
+            .append("TF", tokens.get(token).count)
+            .append("position", tokens.get(token).position);
 
-          List<Document> docs = new ArrayList<>();
-          docs.add(new Document("_id", new ObjectId(docID))
-              .append("TF", tokens.get(token).count)
-              .append("position", tokens.get(token).position));
-
-          Document document = new Document().append("token", token).append("docs", docs);
-
-          invertedCollection.insertOne(document);
-        } else {
-
-          Document newDoc = new Document("_id", new ObjectId(docID))
-              .append("TF", tokens.get(token).count)
-              .append("position", tokens.get(token).position);
-
-          invertedCollection.updateOne(Filters.eq("token", token),
-              Updates.push("docs", newDoc));
-        }
+        invertedCollection.updateOne(
+            Filters.eq("token", token),
+            Updates.addToSet("docs", newDoc),
+            new UpdateOptions().upsert(true));
       }
 
       // update document to be indexed
@@ -379,8 +367,8 @@ public class DBManager {
     }
   }
 
-  public List<ObjectId> getDocs(String[] tokens) {
-    List<ObjectId> docIds = new ArrayList<>();
+  public List<String> getDocs(String[] tokens) {
+    List<String> docIds = new ArrayList<>();
     List<String> tokenList = Arrays.asList(tokens);
 
     try {
@@ -391,8 +379,7 @@ public class DBManager {
 
       List<Document> aggregationResult = invertedCollection.aggregate(pipeline).into(new ArrayList<>());
       for (Document doc : aggregationResult) {
-        ObjectId docId = doc.getObjectId("_id");
-        docIds.add(docId);
+        docIds.add(doc.getObjectId("_id").toString());
       }
 
       return docIds;
