@@ -164,8 +164,46 @@ public class DBManager {
       return updateResult.getModifiedCount() == 1;
 
     } catch (MongoException e) {
-      System.out.println("Error while updating popularity: " + e.getMessage());
+      System.out.println("Error while updating Parents array: " + e.getMessage());
       return false;
+    }
+  }
+
+  /**
+   * getUrlsCount - Returns the number of Urls in the database.
+   * 
+   * @return int - represents number of Urls in the database.
+   */
+  public int getUrlsCount() {
+    try {
+      return (int) docCollection.countDocuments();
+
+    } catch (MongoException e) {
+      System.out.println("Error while getting urls count: " + e.getMessage());
+      return -1;
+    }
+  }
+
+  /**
+   * getParentsArr - returns an array of parents for a certain url.
+   * 
+   * @param ranker_id - the url ranker id.
+   * @return List<Integer> - list of parents ids
+   */
+  public List<Integer> getParentsArr(int ranker_id) {
+    try {
+
+      // Filter the Document I want.
+      Document filter = new Document("ranker_id", ranker_id);
+
+      // Find documents matching the filter in the docCollection
+      FindIterable<Document> matchingUrls = docCollection.find(filter);
+
+      return matchingUrls.first().getList("parents", Integer.class);
+
+    } catch (MongoException e) {
+      System.out.println("Error while getting parents array: " + e.getMessage());
+      return new ArrayList<Integer>();
     }
   }
 
