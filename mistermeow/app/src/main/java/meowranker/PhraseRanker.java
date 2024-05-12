@@ -14,25 +14,50 @@ public class PhraseRanker extends Ranker {
     }
 
     // TODO: change function return type
-    public void rank(String query) {
-        // TODO:Call function to construct M matrix required to calculate popularity
-        // TODO: Call function getPopularity()
+    public List<Document> rank(String query) {
+        
+        //  applying PR algorithm
+        double [][] M = this.constructUrlsGraph();
+        double [] popularity = this.getPopularity(M , M.length);
 
-
+        //  Tokenizing query
         List<String> searchTokens = tokenizer.tokenizeString(query);
         System.out.println(searchTokens);
 
-        this.testTokenDocCount(searchTokens);
-        // List<Document> matchedDocs = getMatchingDocs(searchTokens, query);
 
+        //  getting docs common in all tokens & matches the query phrase
+        List<Document> matchedDocs = getMatchingDocs(searchTokens, query);
+        
         // System.out.println(matchedDocs.size());
-
         // for (Document doc : matchedDocs) {
         //     System.out.println(doc.getString("URL"));
         // }
 
+        // calculating  relevance for each document
+        List<Double> relevance = this.calculateRelevance(matchedDocs , searchTokens , popularity);
+        
+        // for (Double val: relevance){
+        //     System.out.println(val);
+        // }
+
+        List<Map.Entry<Document , Double>> finalRank = this.combineRelWithPop(matchedDocs , relevance , popularity);
+
+        finalRank.sort(Map.Entry.comparingByValue());
+        
+        System.out.println("======================================");
+        System.out.println("=========== Final Result =============");
+        System.out.println("======================================");
+
+        List<Document> SortedList = new ArrayList<>();
+        for(Map.Entry<Document , Double> e:finalRank){
+            SortedList.add(e.getKey());
+            System.out.println(e.getKey().getString("URL") + " " + e.getValue());
+        }
+
+
+
         // TODO: call function sort by higher rank
-        // return matchedDocs;
+        return SortedList;
     }
 
     private List<Document> getMatchingDocs(List<String> searchTokens , String query) {
