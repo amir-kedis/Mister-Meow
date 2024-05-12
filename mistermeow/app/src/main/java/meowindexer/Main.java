@@ -2,6 +2,8 @@ package meowindexer;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer.Token;
 import org.bson.Document;
@@ -25,31 +27,43 @@ public class Main {
     Tokenizer tokenizer = new Tokenizer();
     int patchNumber = 0;
 
+    int numThreads = 50;
+    ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+
     while (unindexedDocs.size() > 0) {
       printPatchNumber(patchNumber);
 
       for (Document doc : unindexedDocs) {
-        String title = doc.getString("title");
-        String content = doc.getString("content");
-        org.jsoup.nodes.Document contentDoc = Jsoup.parse(content);
+        executor.submit(() -> {
+          String title = doc.getString("title");
+          String content = doc.getString("content");
+          org.jsoup.nodes.Document contentDoc = Jsoup.parse(content);
 
-        System.out.println(ANSI_PURPLE + "==>Indexing: " + title + ANSI_RESET);
-        HashMap<String, Token> tokens = tokenizer.tokenize(contentDoc);
-        System.out.println(ANSI_GREEN + "==>Tokens: " + tokens.size() +
-                           ANSI_RESET);
-        try {
-          db.insertInverted(doc.getObjectId("_id").toString(), tokens);
-        } catch (Exception e) {
-          System.out.println(ANSI_RED + "==>Error: " + e.getMessage() +
-                             ANSI_RESET);
-        }
+          System.out.println(ANSI_PURPLE + "==>Indexing: " + title +
+              ANSI_RESET);
+          HashMap<String, Token> tokens = tokenizer.tokenize(contentDoc);
+          System.out.println(ANSI_GREEN + "==>Tokens: " + tokens.size() +
+              "in " + title + ANSI_RESET);
+          try {
+            db.insertInverted(doc.getObjectId("_id").toString(), tokens);
+          } catch (Exception e) {
+            System.out.println(ANSI_RED + "==>Error: " + e.getMessage() +
+                ANSI_RESET);
+          }
 
-        System.out.println(ANSI_YELLOW + "==>Inserted into db: " + title +
-                           ANSI_RESET);
+          System.out.println(ANSI_YELLOW + "==>Inserted into db: " + title +
+              ANSI_RESET);
+        });
+      }
+
+      executor.shutdown();
+      // Wait until all threads are finish
+      while (!executor.isTerminated()) {
       }
 
       unindexedDocs = db.getDocumentsNotIndexed(50);
       patchNumber++;
+      executor = Executors.newFixedThreadPool(numThreads);
     }
 
     printFinished();
@@ -69,19 +83,19 @@ public class Main {
 
   public static void printPatchNumber(int patchNumber) {
     System.out.println(ANSI_GREEN +
-                       "==============================" + ANSI_RESET);
+        "==============================" + ANSI_RESET);
     System.out.println(ANSI_GREEN + "|| Starting patch number: " + patchNumber +
-                       " ||" + ANSI_RESET);
+        " ||" + ANSI_RESET);
     System.out.println(ANSI_GREEN +
-                       "==============================" + ANSI_RESET);
+        "==============================" + ANSI_RESET);
   }
 
   public static void printFinished() {
     System.out.println(ANSI_RED +
-                       "====================================" + ANSI_RESET);
+        "====================================" + ANSI_RESET);
     System.out.println(ANSI_RED + "|| Finished indexing all docs!  ||" +
-                       ANSI_RESET);
+        ANSI_RESET);
     System.out.println(ANSI_RED +
-                       "====================================" + ANSI_RESET);
+        "====================================" + ANSI_RESET);
   }
 }
