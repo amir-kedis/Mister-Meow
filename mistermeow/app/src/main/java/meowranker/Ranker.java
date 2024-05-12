@@ -4,13 +4,16 @@ package meowranker;
 import java.util.*;
 import java.lang.Math;
 import meowdbmanager.DBManager;
+import meowindexer.Tokenizer;
 
 public class Ranker {
 
     public DBManager db;
-
+    public Tokenizer tokenizer;
+    
     public Ranker(){
         db = new DBManager();
+        tokenizer = new Tokenizer();
     }
 
     // The function takes graph of links between documents

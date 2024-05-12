@@ -292,6 +292,27 @@ public class DBManager {
     }
   }
 
+  //! Not working
+  public List<Document> getCommonDocs(List<String> searchTokens){
+    try {
+      Document query = new Document("$and", Arrays.asList(
+      new Document("token",  new Document("docs" , new Document("$exists", true).append("$all", Arrays.asList(searchTokens))))));
+
+      System.out.println(query);
+      List<Document> docs = invertedCollection.find(query).into(new ArrayList<>());
+      
+      for(Document doc:docs){
+        System.out.println(doc);
+      }
+      return docs;
+
+    } catch (MongoException e) {
+        System.out.println("Error occurred while getting docs: " +
+        e.getMessage());
+        return null;
+    }
+  }
+
   @Override
   protected void finalize() throws Throwable {
     mongoClient.close();
