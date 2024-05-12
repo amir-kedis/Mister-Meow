@@ -1,6 +1,9 @@
 package meowEngine;
 
+import java.util.List;
+
 import javax.ws.rs.*;
+import meowindexer.Tokenizer;
 
 /*
  * get search query from frontend
@@ -21,27 +24,34 @@ import javax.ws.rs.*;
  * 2. get suggestions -> Endpoint (GET /suggestions)
  * 3. post search query -> Endpoint (POST /search)
  * 4. post pagination -> Endpoint (POST /page)
- * 5. get all results metadata -> Endpoint (GET /metaResults)
- * 6. get all results info -> Endpoint (GET /results)
- * 7. preprocess the query -> middleware
- * 8. search in the indexer and get all docs -> middleware
- * 9. rank the docs -> middleware
- * 10. Save all docs in a list -> middleware
+ * 6. get all results metadata -> middleware
+ * 7. get all results info -> middleware
+ * 8. preprocess the query -> middleware
+ * 9. search in the indexer and get all docs -> middleware
+ * 10. rank the docs -> middleware
+ * 11. Save all docs in a list -> middleware
  *
  */
 
 @Path("/")
 public class queryEngine {
+  private Tokenizer tokenizer;
 
   @GET
   @Path("/suggestions")
-  public String getSuggestions() {
+  public String getSuggestions(
+      @QueryParam("query") String query) {
+
+    List<String> tokens = tokenizer.tokenizeString(query);
     return "Suggestions";
   }
 
   @POST
   @Path("/search")
-  public String searchQuery() {
+  public String searchQuery(
+      @QueryParam("query") String query) {
+
+    List<String> tokens = tokenizer.tokenizeString(query);
     return "Search Query";
   }
 
@@ -51,20 +61,12 @@ public class queryEngine {
     return "Pagination";
   }
 
-  @GET
-  @Path("/metaResults")
   public String getResultsMetadata() {
     return "Results Metadata";
   }
 
-  @GET
-  @Path("/results")
   public String getResultsInfo() {
     return "Results Info";
-  }
-
-  public void preprocessQuery() {
-    System.out.println("Preprocess Query");
   }
 
   public void searchIndexer() {
