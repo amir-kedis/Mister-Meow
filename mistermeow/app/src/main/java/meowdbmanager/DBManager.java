@@ -250,7 +250,7 @@ public class DBManager {
 
     try {
 
-      Document docQuery = new Document("query", Pattern.compile("^" + Pattern.quote(query)));
+      Document docQuery = new Document("query", Pattern.compile("^" + Pattern.quote(query), Pattern.CASE_INSENSITIVE));
       queryCollection.find(docQuery).limit(limit).forEach(doc -> {
         matchingSuggestions.add(doc.getString("query"));
       });

@@ -1,8 +1,15 @@
 package meowEngine;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.ws.rs.*;
+
+import org.bson.Document;
+import org.bson.types.ObjectId;
+
+import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
 
 /*
@@ -35,49 +42,77 @@ import meowindexer.Tokenizer;
 
 @Path("/")
 public class queryEngine {
-  private Tokenizer tokenizer;
+  private DBManager dbManager = new DBManager();
+  private List<ObjectId> docs = new ArrayList<>();
+  private boolean isPhraseMatching = false, isFirstTime = true;
+  private int[] operators = new int[2]; // 0: None, 1: AND, 2: OR, 3: NOT
 
   @GET
   @Path("/suggestions")
-  public String getSuggestions(
+  public List<String> getSuggestions(
       @QueryParam("query") String query) {
 
-    List<String> tokens = tokenizer.tokenizeString(query);
-    return "Suggestions";
+    return dbManager.getSuggestions(query, 10);
   }
 
   @POST
-  @Path("/search")
-  public String searchQuery(
-      @QueryParam("query") String query) {
+  @Path("/search/{q}/{p}")
+  public List<Document> searchQuery(
+      @PathParam("q") String query,
+      @PathParam("p") int page) {
 
-    List<String> tokens = tokenizer.tokenizeString(query);
-    return "Search Query";
+    if (isFirstTime) {
+      parse(query);
+      dbManager.insertSuggestion(query);
+      docs = rankDocs(query.toLowerCase().split("\\s+"));
+      isFirstTime = false;
+    }
+
+    int startIndex = page * 20;
+    int endIndex = Math.min(startIndex + 20, docs.size());
+    return getResults(docs.subList(startIndex, endIndex));
   }
 
-  @POST
-  @Path("/page")
-  public String changePagination() {
-    return "Pagination";
+  private void parse(String query) {
+    isPhraseMatching = false;
+    operators[0] = operators[1] = 0;
+    String operatorString[] = { "AND", "OR", "NOT" };
+
+    if (query.charAt(0) == '"' && query.charAt(query.length() - 1) == '"')
+      isPhraseMatching = true;
+
+    int i = 1;
+    for (String operator : operatorString) {
+      int index = query.indexOf(operator);
+      if (index != -1) {
+        if (operators[0] == 0)
+          operators[0] = i;
+        else
+          operators[1] = i;
+      }
+      i++;
+    }
   }
 
-  public String getResultsMetadata() {
+  private List<Document> getResults(List<ObjectId> docs) {
+    getResultsMetadata();
+    getResultsInfo();
+    return null;
+  }
+
+  private String getResultsMetadata() {
     return "Results Metadata";
   }
 
-  public String getResultsInfo() {
+  private String getResultsInfo() {
     return "Results Info";
   }
 
-  public void searchIndexer() {
-    System.out.println("Search Indexer");
+  private String getSnippet(String doc, HashSet<String> tokens) {
+    return "Snippet";
   }
 
-  public void rankDocs() {
-    System.out.println("Rank Docs");
-  }
-
-  public void saveCurrentDocs() {
-    System.out.println("Save Docs");
+  private List<ObjectId> rankDocs(String[] tokens) {
+    return null;
   }
 }
