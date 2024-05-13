@@ -48,6 +48,9 @@ function SRP() {
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Search button clicked");
+    if (query.trim() === "") {
+      return;
+    }
     navigate(`/search/${query}/1`);
   };
 
@@ -70,12 +73,6 @@ function SRP() {
         </div>
       </nav>
       <div className="flex-grow container">
-        {data && data.results?.length == 0 && (
-          <div className="flex place-items-center text-center justify-center font-bilya">
-            No results found
-          </div>
-        )}
-
         {data && (
           <div>
             <h6 className="font-inder mt-1 text-caption text-sm ">
@@ -93,6 +90,12 @@ function SRP() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div className="col-span-2">
+                {data && data.results?.length == 0 && (
+                  <div className="flex place-items-center text-center justify-center min-h-[60vh] font-bilya">
+                    No results found
+                  </div>
+                )}
+
                 {data.results.map(
                   (result) =>
                     result.snippets && (
