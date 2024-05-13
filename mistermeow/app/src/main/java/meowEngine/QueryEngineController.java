@@ -12,26 +12,34 @@ import org.jsoup.Jsoup;
 import org.springframework.web.bind.annotation.*;
 
 import meowdbmanager.DBManager;
+import meowindexer.Tokenizer;
 
 @RestController
 @RequestMapping("/")
 public class QueryEngineController {
   private DBManager dbManager;
-  private List<String> docs;
+  private Tokenizer tokenizer;
+  private List<ObjectId> docs;
   private String currentQuery;
   private boolean isPhraseMatching, isFirstTime;
   private String[] phrases;
   private int[] operators; // 0: None, 1: AND, 2: OR, 3: NOT
+  private List<String> tags, suggestions;
+  private int resultCount;
   private final int numOfDocsInPage = 20, windowCharSize = 100;
 
   public QueryEngineController() {
     dbManager = new DBManager();
+    tokenizer = new Tokenizer();
     docs = new ArrayList<>();
     currentQuery = "";
     isPhraseMatching = false;
     isFirstTime = true;
     phrases = new String[3];
     operators = new int[2];
+    tags = new ArrayList<>();
+    suggestions = new ArrayList<>();
+    resultCount = 0;
   }
 
   @GetMapping("/")
@@ -41,7 +49,8 @@ public class QueryEngineController {
 
   @GetMapping("/suggestions")
   public Document getSuggestions(@RequestParam("query") String query) {
-    return new Document("data", dbManager.getSuggestions(query, 10));
+    suggestions = dbManager.getSuggestions(query, 10);
+    return new Document("data", suggestions);
   }
 
   @GetMapping("/search")
@@ -58,12 +67,14 @@ public class QueryEngineController {
       docs = rankDocs(query.toLowerCase().split("\\s+"));
       isFirstTime = false;
       currentQuery = query;
+      resultCount = docs.size();
+      tags = tokenizer.tokenizeString(currentQuery);
     }
 
     int startIndex = page * numOfDocsInPage;
     int endIndex = Math.min(startIndex + numOfDocsInPage, docs.size());
-    List<String> subList = docs.subList(startIndex, endIndex);
-    return new Document("data", subList);
+    List<ObjectId> subList = docs.subList(startIndex, endIndex);
+    return new Document("data", getResults(subList));
   }
 
   private void parse(String query) {
@@ -94,18 +105,18 @@ public class QueryEngineController {
     operators[0] = operators[1] = 0;
   }
 
-  private List<Document> getResults(List<ObjectId> docs) {
-    getResultsMetadata();
-    getResultsInfo();
+  private Document getResults(List<ObjectId> docs) {
+    return getResultsInfo(getResultsMetadata(docs));
+  }
+
+  private Document getResultsMetadata(List<ObjectId> docs) {
+    // results, *count*, *tags*, *suggestions*
+    // *host, url, title*, snippets
     return null;
   }
 
-  private String getResultsMetadata() {
-    return "Results Metadata";
-  }
-
-  private String getResultsInfo() {
-    return "Results Info";
+  private Document getResultsInfo(Document data) {
+    return null;
   }
 
   public String getSnippet(String doc, HashSet<String> tokens) {
@@ -134,7 +145,7 @@ public class QueryEngineController {
     return "No Snippet Found";
   }
 
-  private List<String> rankDocs(String[] tokens) {
-    return dbManager.getDocs(tokens);
+  private List<ObjectId> rankDocs(String[] tokens) {
+    return dbManager.getDocIDs(tokens);
   }
 }
