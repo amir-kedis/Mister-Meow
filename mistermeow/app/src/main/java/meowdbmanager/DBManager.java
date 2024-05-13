@@ -182,7 +182,7 @@ public class DBManager {
       System.out.println("Error while getting urls count: " + e.getMessage());
       return -1;
     }
-  } 
+  }
 
   /**
    * getParentsArr - returns an array of parents for a certain url.
@@ -329,6 +329,18 @@ public class DBManager {
     }
   }
 
+  public Document getDocuments(List<ObjectId> docIDs) {
+    try {
+      Document doc = docCollection.find(new Document("_id", new ObjectId(docID))).first();
+      return doc;
+    } catch (MongoException e) {
+
+      System.out.println("Error occurred while getting document: " +
+          e.getMessage());
+      return null;
+    }
+  }
+
   public Document getInvertedIndex(String token) {
     try {
       Document indices = invertedCollection.find(new Document("token", token)).first();
@@ -367,8 +379,8 @@ public class DBManager {
     }
   }
 
-  public List<String> getDocs(String[] tokens) {
-    List<String> docIds = new ArrayList<>();
+  public List<ObjectId> getDocIDs(String[] tokens) {
+    List<ObjectId> docIds = new ArrayList<>();
     List<String> tokenList = Arrays.asList(tokens);
 
     try {
@@ -379,7 +391,7 @@ public class DBManager {
 
       List<Document> aggregationResult = invertedCollection.aggregate(pipeline).into(new ArrayList<>());
       for (Document doc : aggregationResult) {
-        docIds.add(doc.getObjectId("_id").toString());
+        docIds.add(doc.getObjectId("_id"));
       }
 
       return docIds;
