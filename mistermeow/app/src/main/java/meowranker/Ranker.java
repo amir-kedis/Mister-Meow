@@ -190,12 +190,25 @@ public class Ranker {
       double[] popularity) {
     List<Double> relevance = new ArrayList<>();
 
+    final double boost = 1.1; // 10% boost for the relevance
+
     for (int i = 0; i < docIds.size(); i++) {
       double val = 0;
       for (String token : searchTokens) {
         // summation(tf-idf)
+        String position = db.getPoisitionFromInverted(token, docIds.get(i));
+
         val += db.getDocumentFromInverted(token, docIds.get(i)) * getIDF(token);
+        if (!position.equals("other"))
+          val += boost;
+        // NOTE: uncomment when testing
+        // System.out.println(
+        // "Token: " + token + " IDF: " + getIDF(token) +
+        // " TF: " + db.getDocumentFromInverted(token, docIds.get(i)) +
+        // " Position: " + position);
       }
+      // System.out.println("Relevance: " + val);
+
       relevance.add(val);
     }
 

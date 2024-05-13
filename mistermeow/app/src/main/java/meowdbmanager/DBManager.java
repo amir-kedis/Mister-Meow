@@ -472,6 +472,28 @@ public class DBManager {
     }
   }
 
+  public String getPoisitionFromInverted(String token, ObjectId docID) {
+    try {
+      Document query = new Document("token", token).append("docs._id", docID);
+
+      Document result = invertedCollection.find(query)
+          .projection(new Document("docs.$", 1))
+          .first();
+
+      if (result != null)
+        return result.getList("docs", Document.class)
+            .get(0)
+            .getString("position");
+      ;
+      return null;
+    } catch (MongoException e) {
+
+      System.out.println("Error occurred while getting indices: " +
+          e.getMessage());
+      return null;
+    }
+  }
+
   public List<ObjectId> getDocIDs(List<String> tokens) {
     List<ObjectId> docIds = new ArrayList<>();
 
