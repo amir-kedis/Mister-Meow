@@ -7,7 +7,6 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
 
-
 public class PhraseRanker extends Ranker {
 
     public PhraseRanker() {
@@ -16,7 +15,6 @@ public class PhraseRanker extends Ranker {
 
     // TODO: change function return type
     public List<ObjectId> rank(String query) {
-
 
         double[] popularity = getPopularityArr();
 
@@ -27,10 +25,10 @@ public class PhraseRanker extends Ranker {
         // getting docs common in all tokens & matches the query phrase
         List<ObjectId> matchedDocs = getMatchingDocs(searchTokens, query);
 
-        System.out.println(matchedDocs.size()+ " || " + ProcessedDocs.size());
+        System.out.println(matchedDocs.size() + " || " + ProcessedDocs.size());
         // for (Document doc : ProcessedDocs) {
-        //     System.out.println(doc.getString("URL"));
-        //     System.out.println(doc.)
+        // System.out.println(doc.getString("URL"));
+        // System.out.println(doc.)
         // }
 
         // calculating relevance for each document
@@ -44,7 +42,6 @@ public class PhraseRanker extends Ranker {
 
         finalRank.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
 
-
         System.out.println("======================================");
         System.out.println("=========== Final Result =============");
         System.out.println("======================================");
@@ -52,14 +49,17 @@ public class PhraseRanker extends Ranker {
         List<ObjectId> SortedList = new ArrayList<>();
         for (Map.Entry<ObjectId, Double> e : finalRank) {
             SortedList.add(e.getKey());
-            System.out.println("URL: "+ db.getDocument(e.getKey().toString()).getString("URL") + "|| Rank = " + e.getValue());
-            // The previous printing is time costly, comment it if you're not testing of debugging
+            // System.out.println("URL: "+
+            // db.getDocument(e.getKey().toString()).getString("URL") + "|| Rank = " +
+            // e.getValue()); The previous printing is time costly, comment it if
+            // you're not testing of debugging
         }
 
         return SortedList;
     }
 
-    private List<ObjectId> getMatchingDocs(List<String> searchTokens, String query) {
+    private List<ObjectId> getMatchingDocs(List<String> searchTokens,
+            String query) {
 
         List<ObjectId> docs = getCommonDocs(searchTokens);
 
@@ -67,22 +67,23 @@ public class PhraseRanker extends Ranker {
 
         this.ProcessedDocs = new ArrayList<>();
         for (ObjectId id : docs) {
-            Document currDoc = db.getDocument(id.toString());               // getting the document by id
-        
-            String content = currDoc.getString("content");              // getting the content of the document
-            String text = Jsoup.parse(content).text();                      // separating html from content
+            Document currDoc = db.getDocument(id.toString()); // getting the document by id
 
-            String regex = "(?i)" + query;                       // making case-insensitive search
+            String content = currDoc.getString("content"); // getting the content of the document
+            String text = Jsoup.parse(content).text(); // separating html from content
+
+            String regex = "(?i)" + query; // making case-insensitive search
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(text);
 
             boolean flag = matcher.find();
 
             if (flag) {
-                finalDocs.add(currDoc.getObjectId("_id"));              // adding the documents that matches the query 
-                ProcessedDocs.add(db.getDocument(id.toString()));           //  Saving documents to access db only once
-            }                                                           
-
+                finalDocs.add(currDoc.getObjectId(
+                        "_id")); // adding the documents that matches the query
+                ProcessedDocs.add(db.getDocument(
+                        id.toString())); // Saving documents to access db only once
+            }
         }
 
         return finalDocs;
@@ -128,8 +129,7 @@ public class PhraseRanker extends Ranker {
                 docsId.retainAll(currDocsId);
             }
         }
-      
-         return docsId;
-    }
 
+        return docsId;
+    }
 }

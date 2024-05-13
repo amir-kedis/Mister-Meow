@@ -13,13 +13,13 @@ public class Ranker {
 
   public static DBManager db;
   public static Tokenizer tokenizer;
-  public static int counter = 0;
-  public List<Document> ProcessedDocs;    //  used to access db only once while crawling
+  public static int counter = 1;
+  public List<Document> ProcessedDocs; // used to access db only once while crawling
 
   public Ranker() {
     db = new DBManager();
     tokenizer = new Tokenizer();
-    
+
     if (counter == 0)
       calculatePopularity();
   }
@@ -60,8 +60,8 @@ public class Ranker {
     return currRank;
   }
 
-  public static double[] calculateCurrRank(double[] prevRank, int UrlsCount, double d,
-      double[][] M_hat) {
+  public static double[] calculateCurrRank(double[] prevRank, int UrlsCount,
+      double d, double[][] M_hat) {
 
     double[] currRank = new double[UrlsCount];
 
@@ -110,14 +110,14 @@ public class Ranker {
 
   public double[] getPopularityArr() {
     int numberOfUrls = db.getUrlsCount();
-    double[] popularityArr = new double[numberOfUrls];
+    // double[] popularityArr = new double[numberOfUrls];
 
-    for (int i = 0; i < numberOfUrls; i++) {
-      double popularity = db.getPopularity(i);
-      popularityArr[i] = popularity;
-    }
+    // for (int i = 0; i < numberOfUrls; i++) {
+    // double popularity = db.getPopularity(i);
+    // popularityArr[i] = popularity;
+    // }
 
-    return popularityArr;
+    return db.getPopularityArr();
   }
 
   /**
@@ -218,14 +218,14 @@ public class Ranker {
       double[] popularity) {
     List<Map.Entry<ObjectId, Double>> finalRank = new ArrayList<>();
     int ind = 0;
-    for (Document  doc : ProcessedDocs) {
+    for (Document doc : ProcessedDocs) {
       int ranker_id = doc.getInteger("ranker_id");
 
       Map.Entry<ObjectId, Double> entry = new AbstractMap.SimpleEntry<>(
           docs.get(ind), relevance.get(ind) + popularity[ranker_id]);
       finalRank.add(entry);
 
-      ind++;  
+      ind++;
     }
 
     return finalRank;
@@ -240,5 +240,4 @@ public class Ranker {
         System.out.println((double) invertedInd.getInteger("DF"));
     }
   }
-
 }
