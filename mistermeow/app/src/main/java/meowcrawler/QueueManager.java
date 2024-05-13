@@ -120,9 +120,9 @@ public class QueueManager {
 class llComparator implements Comparator<LinkedList<Url>> {
   public int compare(LinkedList<Url> l1, LinkedList<Url> l2) {
     if (l1.size() < l2.size())
-      return 1;
-    else if (l1.size() > l2.size())
       return -1;
+    else if (l1.size() > l2.size())
+      return 1;
     else
       return 0;
   }
