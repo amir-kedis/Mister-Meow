@@ -1,6 +1,7 @@
 package meowEngine;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +27,7 @@ public class QueryEngineController {
   private boolean isPhraseMatching, isFirstTime;
   private String[] phrases;
   private int[] operators; // 0: None, 1: AND, 2: OR, 3: NOT
-  private List<String> tags, suggestions;
+  private List<String> tokens, tags, suggestions;
   private int resultCount;
   private final int numOfDocsInPage = 20, windowCharSize = 100;
 
@@ -41,6 +42,7 @@ public class QueryEngineController {
     phrases = new String[3];
     operators = new int[2];
     tags = new ArrayList<>();
+    tokens = new ArrayList<>();
     suggestions = new ArrayList<>();
     resultCount = 0;
   }
@@ -65,13 +67,14 @@ public class QueryEngineController {
       isFirstTime = true;
 
     if (isFirstTime) {
-      parse(query);
-      dbManager.insertSuggestion(query);
-      docs = rankDocs(query.toLowerCase().split("\\s+"));
-      isFirstTime = false;
       currentQuery = query;
+      parse(currentQuery);
+      dbManager.insertSuggestion(currentQuery);
+      tokens = tokenizer.tokenizeString(currentQuery, false);
+      tags = tokenizer.tokenizeString(currentQuery, false);
+      docs = rankDocs();
+      isFirstTime = false;
       resultCount = docs.size();
-      tags = tokenizer.tokenizeString(currentQuery);
       suggestions = dbManager.getSuggestions(query, 10);
     }
 
@@ -113,10 +116,10 @@ public class QueryEngineController {
     for (Document result : results) {
       String doc = result.getString("content");
       String snippet = isPhraseMatching ? getSnippet(doc, phrases[0])
-          : getSnippet(doc, tags);
+          : getSnippet(doc, tokens);
       result.remove("content");
       result.remove("_id");
-      result.append("snippet", snippet);
+      result.append("snippets", snippet);
     }
 
     System.out.println(results);
@@ -132,35 +135,35 @@ public class QueryEngineController {
     String textContent = Jsoup.parse(doc).text();
 
     for (String token : tokens) {
-      token = " " + token + " ";
-      if (textContent.contains(token)) {
-        int index = textContent.indexOf(token);
+      Matcher tokenMatch = Pattern.compile("\\b" + token + "\\b").matcher(textContent);
+      if (tokenMatch.find()) {
+        int index = tokenMatch.start();
         int start = Math.max(0, index - windowCharSize);
         int end = Math.min(textContent.length(), index + windowCharSize);
         return textContent.substring(start, end);
       }
     }
 
-    return "No Snippet Found";
+    return null;
   }
 
   public String getSnippet(String doc, String phrase) {
     String textContent = Jsoup.parse(doc).text();
 
-    phrase = " " + phrase + " ";
-    if (textContent.contains(phrase)) {
-      int index = textContent.indexOf(phrase);
+    Matcher phraseMatch = Pattern.compile("//b" + phrase + "//b").matcher(textContent);
+    if (phraseMatch.find()) {
+      int index = phraseMatch.start();
       int start = Math.max(0, index - windowCharSize);
       int end = Math.min(textContent.length(), index + windowCharSize);
       return textContent.substring(start, end);
     }
 
-    return "No Snippet Found";
+    return null;
   }
 
-  private List<ObjectId> rankDocs(String[] tokens) {
+  private List<ObjectId> rankDocs() {
     if (isPhraseMatching)
       return phraseRanker.rank(phrases[0]);
-    return dbManager.getDocIDs(tokens);
+    return dbManager.getDocIDs(tags);
   }
 }
