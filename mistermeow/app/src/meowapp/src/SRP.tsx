@@ -11,12 +11,15 @@ import SRPPagination from "./components/SRPPagination.tsx";
 
 export async function loader({
   params = { query: "", page: 1 },
-}): Promise<{ data: Results; query: string; page: number }> {
+}): Promise<{ data: Results; query: string; page: number; fetchTime: number }> {
   const { query, page } = params;
   console.log("Query", query);
   console.log("Page", page);
+
+  const startTime = Date.now();
   const data = await fetchResults(query, page);
-  return { data, query, page };
+  const fetchTime = Date.now() - startTime;
+  return { data, query, page, fetchTime };
 }
 
 interface ThemeContextType {
@@ -33,10 +36,12 @@ function SRP() {
     data,
     query: initQuery,
     page: initPage,
+    fetchTime,
   } = useLoaderData() as {
     data: Results;
     query: string;
     page: number;
+    fetchTime: number;
   };
   const { theme } = useContext(ThemeContext) as unknown as ThemeContextType;
   const [query, setQuery] = useState(initQuery || "");
@@ -75,8 +80,9 @@ function SRP() {
       <div className="flex-grow container">
         {data && (
           <div>
-            <h6 className="font-inder mt-1 text-caption text-sm ">
-              Meow Found about {data.count.toLocaleString()} results
+            <h6 className="font-inder mt-3 mb-3 text-caption text-sm ">
+              Meow Found about <strong>{data.count.toLocaleString()}</strong>{" "}
+              results in <strong>{(fetchTime / 1000).toLocaleString()}s</strong>
             </h6>
             <div className="mt-1 flex no-wrap gap-4 place-items-center">
               {data.tags.map((tag) => (
@@ -99,7 +105,7 @@ function SRP() {
                 {data.results.map(
                   (result) =>
                     result.snippets && (
-                      <div className="mb-4" key={result.URL}>
+                      <div className="mb-6" key={result.URL}>
                         <a href={result.URL} target="_blank">
                           <div className="flex gap-2">
                             <CatIcon />
@@ -107,7 +113,7 @@ function SRP() {
                               <span className="text-sm text-sr-host leading-tight">
                                 {result.host}
                               </span>
-                              <span className="text-sm text-sr-url leading-tight hover:underline">
+                              <span className="text-sm truncate max-w-[80ch] text-sr-url leading-tight hover:underline">
                                 {result.URL}
                               </span>
                             </div>
