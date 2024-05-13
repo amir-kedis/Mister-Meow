@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.*;
 
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
+import meowranker.PhraseRanker;
 
 @RestController
 @RequestMapping("/")
 public class QueryEngineController {
   private DBManager dbManager;
   private Tokenizer tokenizer;
+  private PhraseRanker phraseRanker;
   private List<ObjectId> docs;
   private String currentQuery;
   private boolean isPhraseMatching, isFirstTime;
@@ -30,6 +32,7 @@ public class QueryEngineController {
   public QueryEngineController() {
     dbManager = new DBManager();
     tokenizer = new Tokenizer();
+    phraseRanker = new PhraseRanker();
     docs = new ArrayList<>();
     currentQuery = "";
     isPhraseMatching = false;
@@ -155,6 +158,8 @@ public class QueryEngineController {
   }
 
   private List<ObjectId> rankDocs(String[] tokens) {
+    if (isPhraseMatching)
+      return phraseRanker.rank(phrases[0]);
     return dbManager.getDocIDs(tokens);
   }
 }

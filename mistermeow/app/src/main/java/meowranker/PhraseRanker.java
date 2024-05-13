@@ -14,56 +14,52 @@ public class PhraseRanker extends Ranker {
     }
 
     // TODO: change function return type
-    public List<Document> rank(String query) {
-        
-        //  applying PR algorithm
-        double [][] M = this.constructUrlsGraph();
-        double [] popularity = this.getPopularity(M , M.length);
+    public List<ObjectId> rank(String query) {
 
-        //  Tokenizing query
+        // applying PR algorithm
+        double[][] M = this.constructUrlsGraph();
+        double[] popularity = this.getPopularity(M, M.length);
+
+        // Tokenizing query
         List<String> searchTokens = tokenizer.tokenizeString(query);
         System.out.println(searchTokens);
 
-
-        //  getting docs common in all tokens & matches the query phrase
+        // getting docs common in all tokens & matches the query phrase
         List<Document> matchedDocs = getMatchingDocs(searchTokens, query);
-        
+
         // System.out.println(matchedDocs.size());
         // for (Document doc : matchedDocs) {
-        //     System.out.println(doc.getString("URL"));
+        // System.out.println(doc.getString("URL"));
         // }
 
-        // calculating  relevance for each document
-        List<Double> relevance = this.calculateRelevance(matchedDocs , searchTokens , popularity);
-        
+        // calculating relevance for each document
+        List<Double> relevance = this.calculateRelevance(matchedDocs, searchTokens, popularity);
+
         // for (Double val: relevance){
-        //     System.out.println(val);
+        // System.out.println(val);
         // }
 
-        List<Map.Entry<Document , Double>> finalRank = this.combineRelWithPop(matchedDocs , relevance , popularity);
+        List<Map.Entry<Document, Double>> finalRank = this.combineRelWithPop(matchedDocs, relevance, popularity);
 
         finalRank.sort(Map.Entry.comparingByValue());
-        
+
         System.out.println("======================================");
         System.out.println("=========== Final Result =============");
         System.out.println("======================================");
 
-        List<Document> SortedList = new ArrayList<>();
-        for(Map.Entry<Document , Double> e:finalRank){
-            SortedList.add(e.getKey());
+        List<ObjectId> SortedList = new ArrayList<>();
+        for (Map.Entry<Document, Double> e : finalRank) {
+            SortedList.add(e.getKey().getObjectId("_id"));
             System.out.println(e.getKey().getString("URL") + " " + e.getValue());
         }
 
-
-
-        // TODO: call function sort by higher rank
         return SortedList;
     }
 
-    private List<Document> getMatchingDocs(List<String> searchTokens , String query) {
+    private List<Document> getMatchingDocs(List<String> searchTokens, String query) {
 
         List<Document> docs = getCommonDocs(searchTokens);
-        
+
         List<Document> finalDocs = new ArrayList<>();
 
         for (Document doc : docs) {
@@ -92,18 +88,17 @@ public class PhraseRanker extends Ranker {
             return new ArrayList<>();
 
         // getting the first token present in db
-        int ind = 0; 
+        int ind = 0;
         Document invertedInd = db.getInvertedIndex(searchTokens.get(0));
         ind++;
-        
-        while(invertedInd == null && ind< searchTokens.size()){
+
+        while (invertedInd == null && ind < searchTokens.size()) {
             invertedInd = db.getInvertedIndex(searchTokens.get(ind));
             ind++;
         }
-        
-        if(invertedInd == null)
-            return new ArrayList<>();
 
+        if (invertedInd == null)
+            return new ArrayList<>();
 
         List<Document> docs = invertedInd.getList("docs", Document.class);
         List<ObjectId> docsId = new ArrayList<>();
@@ -113,7 +108,7 @@ public class PhraseRanker extends Ranker {
         }
 
         for (int i = ind; i < searchTokens.size(); i++) {
-            
+
             invertedInd = db.getInvertedIndex(searchTokens.get(i));
             if (invertedInd != null) {
 
