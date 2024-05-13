@@ -5,13 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import meowdbmanager.DBManager;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
 import org.springframework.web.bind.annotation.*;
-
-import meowdbmanager.DBManager;
 
 @RestController
 @RequestMapping("/")
@@ -45,9 +43,8 @@ public class QueryEngineController {
   }
 
   @GetMapping("/search")
-  public Document searchQuery(
-      @RequestParam("query") String query,
-      @RequestParam("page") int page) {
+  public Document searchQuery(@RequestParam("query") String query,
+                              @RequestParam("page") int page) {
 
     if (!query.equals(currentQuery))
       isFirstTime = true;
@@ -72,7 +69,8 @@ public class QueryEngineController {
     phrases[0] = phrases[1] = phrases[2] = null;
 
     Matcher phraseMatch = Pattern.compile("\"[^\"]+\"").matcher(query);
-    Matcher operatorMatch = Pattern.compile("\"\\s*(AND|OR|NOT)\\s*\"").matcher(query);
+    Matcher operatorMatch =
+        Pattern.compile("\"\\s*(AND|OR|NOT)\\s*\"").matcher(query);
 
     int i = 0;
     while (phraseMatch.find()) {
@@ -85,9 +83,9 @@ public class QueryEngineController {
     while (operatorMatch.find()) {
       String operator = operatorMatch.group().replaceAll("^\"|\"$", "").trim();
       System.out.println(operator);
-      operators[i++] = operator.equals("AND") ? 1
-          : operator.equals("OR") ? 2
-              : 3;
+      operators[i++] = operator.equals("AND")  ? 1
+                       : operator.equals("OR") ? 2
+                                               : 3;
     }
 
     isPhraseMatching = phrases[0] != null;
@@ -100,13 +98,9 @@ public class QueryEngineController {
     return null;
   }
 
-  private String getResultsMetadata() {
-    return "Results Metadata";
-  }
+  private String getResultsMetadata() { return "Results Metadata"; }
 
-  private String getResultsInfo() {
-    return "Results Info";
-  }
+  private String getResultsInfo() { return "Results Info"; }
 
   public String getSnippet(String doc, HashSet<String> tokens) {
     String textContent = Jsoup.parse(doc).text();
@@ -115,7 +109,7 @@ public class QueryEngineController {
       if (textContent.contains(token)) {
         int index = textContent.indexOf(token);
         return textContent.substring(index - windowCharSize,
-            index + windowCharSize);
+                                     index + windowCharSize);
       }
     }
 
@@ -128,7 +122,7 @@ public class QueryEngineController {
     if (textContent.contains(phrase)) {
       int index = textContent.indexOf(phrase);
       return textContent.substring(index - windowCharSize,
-          index + windowCharSize);
+                                   index + windowCharSize);
     }
 
     return "No Snippet Found";

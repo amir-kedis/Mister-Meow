@@ -47,7 +47,8 @@ public class Crawler implements Runnable {
    * @param parent_id - parent url of the current url.
    * @return void.
    */
-  private void handleHashingDoc(Url nUrl, org.jsoup.nodes.Document doc, int parent_id) {
+  private void handleHashingDoc(Url nUrl, org.jsoup.nodes.Document doc,
+      int parent_id) {
     // Make sure that we are crawling english websites only.
     String docLang = doc.select("html").attr("lang");
     boolean insertOrNot = false;
@@ -72,7 +73,8 @@ public class Crawler implements Runnable {
       }
     }
 
-    this.handleInsertionIntoDB(insertOrNot, nUrl, outerDoc, doc.title(), parent_id);
+    this.handleInsertionIntoDB(insertOrNot, nUrl, outerDoc, doc.title(),
+        parent_id);
     outerDoc = null;
   }
 
@@ -100,13 +102,15 @@ public class Crawler implements Runnable {
 
       synchronized (db) {
         db.insertDocument(nUrl.getUrlString(), title, nUrl.getDomainName(), doc,
-            nUrl.getHashedURL(), nUrl.getHashedDoc(), rankerIndex, parents);
+            nUrl.getHashedURL(), nUrl.getHashedDoc(), rankerIndex,
+            parents);
 
         nUrl.setRankerId(rankerIndex);
 
         System.out.println(ANSI_CYAN + "|| Inserted " + nUrl.getUrlString() +
             " into the database"
-            + " Count: " + ++countOfDocumentsCrawled + " ||" + " RankerId: " + rankerIndex++ + " ||");
+            + " Count: " + ++countOfDocumentsCrawled + " ||"
+            + " RankerId: " + rankerIndex++ + " ||");
       }
     } else {
       synchronized (db) {
@@ -162,16 +166,18 @@ public class Crawler implements Runnable {
           url = qM.pop();
           System.out.println("|| Popped " + url.getUrlString() + " ||");
         } catch (Exception e) {
-          System.out.println("Queue is empty");
+          // System.out.println("Queue is empty");
           continue;
         }
       }
 
       synchronized (db) {
-        if (!db.updateInQueue(url.getUrlString(), false)) {
-          System.out.println("Couldn't update the inQueue field of the url");
+        try {
+          doc = Jsoup.parse(db.getUrlDocument(url.getUrlString()));
+        } catch (Exception e) {
+          System.out.println(e.getMessage());
+          continue;
         }
-        doc = Jsoup.parse(db.getUrlDocument(url.getUrlString()));
       }
 
       // Extract Urls and handle them, hash and check that they was not crawled
@@ -180,6 +186,12 @@ public class Crawler implements Runnable {
       Set<String> extractedUrls = urlH.HandleURLs(doc, url.getUrlString());
 
       HandleHashing(extractedUrls, url.getRankerId());
+
+      synchronized (db) {
+        if (!db.updateInQueue(url.getUrlString(), false)) {
+          System.out.println("Couldn't update the inQueue field of the url");
+        }
+      }
 
       doc = null;
     }
