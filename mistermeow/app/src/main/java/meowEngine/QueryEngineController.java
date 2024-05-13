@@ -14,6 +14,7 @@ import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
 import meowranker.PhraseRanker;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/")
 public class QueryEngineController {
