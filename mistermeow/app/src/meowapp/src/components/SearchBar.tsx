@@ -16,7 +16,7 @@ function SearchBar({ query, setQuery, className }: SearchBarProps) {
     () => fetchSuggestions(query),
     {
       enabled: query.length > 0,
-    }
+    },
   );
 
   const {
@@ -51,7 +51,7 @@ function SearchBar({ query, setQuery, className }: SearchBarProps) {
           </span>
         )}
       </div>
-      {query && data && isFocused && (
+      {query && data && isFocused && data.length > 0 && (
         <div>
           <hr className={`border-t border-searchBorder w-11/12 m-auto mb-2 `} />
           <div className="flex flex-col gap-2 pl-4 pr-4 pb-2">
