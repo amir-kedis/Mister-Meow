@@ -1,8 +1,11 @@
 package meowcrawler;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import meowdbmanager.DBManager;
 import org.bson.Document;
@@ -261,7 +264,21 @@ public class Crawler implements Runnable {
    */
   static public void ProvideSeed(List<Url> urls) {
     Set<String> seeds = urls.stream().map(Url::getUrlString).collect(Collectors.toSet());
-    Crawler c = new Crawler();
-    c.HandleHashing(seeds, -1);
+    int numThreads = seeds.size();
+    ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+
+    for (String seed : seeds) {
+      Crawler c = new Crawler();
+      Set<String> seedsSet = new HashSet<>();
+      seedsSet.add(seed);
+      executor.submit(() -> {
+        c.HandleHashing(seedsSet, -1);
+      });
+    }
+
+    executor.shutdown();
+    // Wait until all threads are finish
+    while (!executor.isTerminated()) {
+    }
   }
 }
