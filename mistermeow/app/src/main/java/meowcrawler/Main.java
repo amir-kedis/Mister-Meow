@@ -43,8 +43,7 @@ public class Main {
     try {
       // NOTE: root path is src/meowindexer/app/. everything is relative to this
       // path
-      BufferedReader reader =
-          new BufferedReader(new FileReader("../data/seed.txt"));
+      BufferedReader reader = new BufferedReader(new FileReader("../data/seed.txt"));
       String line;
       while ((line = reader.readLine()) != null) {
         urls.add(new Url(line, 3));
@@ -60,7 +59,7 @@ public class Main {
     Crawler.ProvideSeed(urls);
 
     List<Thread> threads = new ArrayList<>();
-    for (int i = 0; i < 64; i++) {
+    for (int i = 0; i < 30; i++) {
       Thread t = new Thread(new Crawler());
       threads.add(t);
       t.start();

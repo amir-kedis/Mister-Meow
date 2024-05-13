@@ -37,7 +37,7 @@ public class Ranker {
     double[] currRank;
 
     for (int i = 0; i < UrlsCount; i++)
-      prevRank[i] = 1.0 / (double)UrlsCount;
+      prevRank[i] = 1.0 / (double) UrlsCount;
 
     currRank = calculateCurrRank(prevRank, UrlsCount, d, M_hat);
 
@@ -56,7 +56,7 @@ public class Ranker {
   }
 
   public double[] calculateCurrRank(double[] prevRank, int UrlsCount, double d,
-                                    double[][] M_hat) {
+      double[][] M_hat) {
 
     double[] currRank = new double[UrlsCount];
 
@@ -148,7 +148,7 @@ public class Ranker {
       for (int j = 0; j < nodeParents.size(); j++) {
         int parentId = nodeParents.get(j);
 
-        if (parentId > 0 && parentId < nodesNum) {
+        if (parentId >= 0 && parentId < nodesNum) {
           graph[i][parentId]++;
         }
       }
@@ -182,16 +182,15 @@ public class Ranker {
   }
 
   public List<Double> calculateRelevance(List<Document> docs,
-                                         List<String> searchTokens,
-                                         double[] popularity) {
+      List<String> searchTokens,
+      double[] popularity) {
     List<Double> relevance = new ArrayList<>();
 
     for (int i = 0; i < docs.size(); i++) {
       double val = 0;
       for (String token : searchTokens) {
         // summation(tf-idf)
-        val +=
-            db.getDocumentFromInverted(token, docs.get(i).getObjectId("_id")) *
+        val += db.getDocumentFromInverted(token, docs.get(i).getObjectId("_id")) *
             getIDF(token);
       }
       relevance.add(val);
@@ -207,13 +206,12 @@ public class Ranker {
     if (invertedInd == null) // Handling tokens that are not in any documnets
       return 0;
 
-    df = (double)db.getInvertedIndex(token).getInteger("DF");
-    return Math.log((double)db.getUrlsCount() / df);
+    df = (double) db.getInvertedIndex(token).getInteger("DF");
+    return Math.log((double) db.getUrlsCount() / df);
   }
 
-  protected List<Map.Entry<Document, Double>>
-  combineRelWithPop(List<Document> docs, List<Double> relevance,
-                    double[] popularity) {
+  protected List<Map.Entry<Document, Double>> combineRelWithPop(List<Document> docs, List<Double> relevance,
+      double[] popularity) {
     List<Map.Entry<Document, Double>> finalRank = new ArrayList<>();
     int ind = 0;
     for (Document doc : docs) {
@@ -235,7 +233,7 @@ public class Ranker {
       if (invertedInd == null)
         System.out.println(0);
       else
-        System.out.println((double)invertedInd.getInteger("DF"));
+        System.out.println((double) invertedInd.getInteger("DF"));
     }
   }
 }
