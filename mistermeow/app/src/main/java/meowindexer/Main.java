@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer.Token;
+import meowranker.Ranker;
 import org.bson.Document;
 import org.jsoup.Jsoup;
 
@@ -67,6 +68,8 @@ public class Main {
     }
 
     printFinished();
+
+    calculatePopularity();
   }
 
   private static void printHello() {
@@ -77,6 +80,19 @@ public class Main {
     System.out.println("||  Meowindexer is a  cool  tool  ||");
     System.out.println("||  to index webpages for the fa- ||");
     System.out.println("||       ncy MeowMister SE.       ||");
+    System.out.println("====================================");
+    System.out.println(ANSI_RESET);
+  }
+
+  private static void calculatePopularity() {
+    System.out.println(ANSI_GREEN);
+    System.out.println("====================================");
+    System.out.println("||     Calculating popularity     ||");
+    System.out.println("====================================");
+    Ranker ranker = new Ranker();
+    ranker.calculatePopularity();
+    System.out.println("====================================");
+    System.out.println("||     Popularity calculated!     ||");
     System.out.println("====================================");
     System.out.println(ANSI_RESET);
   }
