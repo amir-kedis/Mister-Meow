@@ -1,7 +1,6 @@
 package meowEngine;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,9 +68,10 @@ public class QueryEngineController {
       currentQuery = query;
       resultCount = docs.size();
       tags = tokenizer.tokenizeString(currentQuery);
+      suggestions = dbManager.getSuggestions(query, 10);
     }
 
-    int startIndex = page * numOfDocsInPage;
+    int startIndex = (page - 1) * numOfDocsInPage;
     int endIndex = Math.min(startIndex + numOfDocsInPage, docs.size());
     List<ObjectId> subList = docs.subList(startIndex, endIndex);
     return new Document("data", getResults(subList));
@@ -88,14 +88,12 @@ public class QueryEngineController {
     int i = 0;
     while (phraseMatch.find()) {
       String phrase = phraseMatch.group().replaceAll("^\"|\"$", "").trim();
-      System.out.println(phrase);
       phrases[i++] = phrase;
     }
 
     i = 0;
     while (operatorMatch.find()) {
       String operator = operatorMatch.group().replaceAll("^\"|\"$", "").trim();
-      System.out.println(operator);
       operators[i++] = operator.equals("AND") ? 1
           : operator.equals("OR") ? 2
               : 3;
@@ -106,27 +104,36 @@ public class QueryEngineController {
   }
 
   private Document getResults(List<ObjectId> docs) {
-    return getResultsInfo(getResultsMetadata(docs));
+
+    List<Document> results = dbManager.getDocuments(docs);
+    for (Document result : results) {
+      String doc = result.getString("content");
+      String snippet = isPhraseMatching ? getSnippet(doc, phrases[0])
+          : getSnippet(doc, tags);
+      result.remove("content");
+      result.remove("_id");
+      result.append("snippet", snippet);
+    }
+
+    System.out.println(results);
+    Document data = new Document("results", results)
+        .append("count", resultCount)
+        .append("tags", tags)
+        .append("suggestions", suggestions);
+
+    return data;
   }
 
-  private Document getResultsMetadata(List<ObjectId> docs) {
-    // results, *count*, *tags*, *suggestions*
-    // *host, url, title*, snippets
-    return null;
-  }
-
-  private Document getResultsInfo(Document data) {
-    return null;
-  }
-
-  public String getSnippet(String doc, HashSet<String> tokens) {
+  public String getSnippet(String doc, List<String> tokens) {
     String textContent = Jsoup.parse(doc).text();
 
     for (String token : tokens) {
+      token = " " + token + " ";
       if (textContent.contains(token)) {
         int index = textContent.indexOf(token);
-        return textContent.substring(index - windowCharSize,
-            index + windowCharSize);
+        int start = Math.max(0, index - windowCharSize);
+        int end = Math.min(textContent.length(), index + windowCharSize);
+        return textContent.substring(start, end);
       }
     }
 
@@ -136,10 +143,12 @@ public class QueryEngineController {
   public String getSnippet(String doc, String phrase) {
     String textContent = Jsoup.parse(doc).text();
 
+    phrase = " " + phrase + " ";
     if (textContent.contains(phrase)) {
       int index = textContent.indexOf(phrase);
-      return textContent.substring(index - windowCharSize,
-          index + windowCharSize);
+      int start = Math.max(0, index - windowCharSize);
+      int end = Math.min(textContent.length(), index + windowCharSize);
+      return textContent.substring(start, end);
     }
 
     return "No Snippet Found";
