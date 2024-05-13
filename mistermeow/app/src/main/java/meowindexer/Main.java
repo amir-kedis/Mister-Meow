@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer.Token;
+import meowranker.QueryRanker;
 import meowranker.Ranker;
 import org.bson.Document;
 import org.jsoup.Jsoup;
@@ -89,7 +90,7 @@ public class Main {
     System.out.println("====================================");
     System.out.println("||     Calculating popularity     ||");
     System.out.println("====================================");
-    Ranker ranker = new Ranker();
+    Ranker ranker = new QueryRanker();
     ranker.calculatePopularity();
     System.out.println("====================================");
     System.out.println("||     Popularity calculated!     ||");

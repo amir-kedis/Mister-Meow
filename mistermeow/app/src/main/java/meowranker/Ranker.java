@@ -8,21 +8,64 @@ import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.query.Query;
 
-public class Ranker {
+public abstract class Ranker {
 
   public static DBManager db;
   public static Tokenizer tokenizer;
-  public static int counter = 1;
   public List<Document> ProcessedDocs; // used to access db only once while crawling
 
   public Ranker() {
     db = new DBManager();
     tokenizer = new Tokenizer();
-
-    if (counter == 0)
-      calculatePopularity();
   }
+
+  public List<ObjectId> rank(String query) {
+
+    double[] popularity = getPopularityArr();
+
+    // Tokenizing query
+    List<String> searchTokens = tokenizer.tokenizeString(query, true);
+    System.out.println(searchTokens);
+
+    // getting docs common in all tokens & matches the query phrase
+    List<ObjectId> matchedDocs = this.getMatchingDocs(searchTokens, query);
+
+    System.out.println(matchedDocs.size() + " || " + ProcessedDocs.size());
+    // for (Document doc : ProcessedDocs) {
+    // System.out.println(doc.getString("URL"));
+    // System.out.println(doc.)
+    // }
+
+    // calculating relevance for each document
+    List<Double> relevance = this.calculateRelevance(matchedDocs, searchTokens, popularity);
+
+    // for (Double val: relevance){
+    // System.out.println(val);
+    // }
+
+    List<Map.Entry<ObjectId, Double>> finalRank = combineRelWithPop(matchedDocs, relevance, popularity);
+
+    finalRank.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+
+    System.out.println("======================================");
+    System.out.println("=========== Final Result =============");
+    System.out.println("======================================");
+
+    List<ObjectId> SortedList = new ArrayList<>();
+    for (Map.Entry<ObjectId, Double> e : finalRank) {
+      SortedList.add(e.getKey());
+      System.out
+          .println("URL: " + db.getDocument(e.getKey().toString()).getString("URL") + " || Rank = " + e.getValue());
+      // The previous printing is time costly, comment it if you're not testing of
+      // debugging
+    }
+
+    return SortedList;
+  }
+
+  protected abstract List<ObjectId> getMatchingDocs(List<String> searchTokens, String query);
 
   // The function takes graph of links between documents
   // where edge from doc1 to doc2 is representing by adding
@@ -210,6 +253,11 @@ public class Ranker {
       // System.out.println("Relevance: " + val);
 
       relevance.add(val);
+    }
+
+    if(this instanceof QueryRanker){
+      QueryRanker ranker = (QueryRanker)this;
+      relevance = ranker.addQueryDocRel(relevance);
     }
 
     return relevance;

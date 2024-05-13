@@ -420,7 +420,8 @@ public class DBManager {
           .append("host", 1)
           .append("URL", 1)
           .append("title", 1)
-          .append("content", 1)));
+          .append("content", 1))
+          .append("ranker_id" , 1));
 
       List<Document> results = docCollection.aggregate(pipeline).into(new ArrayList<>());
 

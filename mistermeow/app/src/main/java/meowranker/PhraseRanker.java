@@ -13,59 +13,14 @@ public class PhraseRanker extends Ranker {
         super();
     }
 
-    // TODO: change function return type
-    public List<ObjectId> rank(String query) {
-
-        double[] popularity = getPopularityArr();
-
-        // Tokenizing query
-        List<String> searchTokens = tokenizer.tokenizeString(query, true);
-        System.out.println(searchTokens);
-
-        // getting docs common in all tokens & matches the query phrase
-        List<ObjectId> matchedDocs = getMatchingDocs(searchTokens, query);
-
-        System.out.println(matchedDocs.size() + " || " + ProcessedDocs.size());
-        // for (Document doc : ProcessedDocs) {
-        // System.out.println(doc.getString("URL"));
-        // System.out.println(doc.)
-        // }
-
-        // calculating relevance for each document
-        List<Double> relevance = this.calculateRelevance(matchedDocs, searchTokens, popularity);
-
-        // for (Double val: relevance){
-        // System.out.println(val);
-        // }
-
-        List<Map.Entry<ObjectId, Double>> finalRank = combineRelWithPop(matchedDocs, relevance, popularity);
-
-        finalRank.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
-
-        System.out.println("======================================");
-        System.out.println("=========== Final Result =============");
-        System.out.println("======================================");
-
-        List<ObjectId> SortedList = new ArrayList<>();
-        for (Map.Entry<ObjectId, Double> e : finalRank) {
-            SortedList.add(e.getKey());
-            // System.out.println("URL: "+
-            // db.getDocument(e.getKey().toString()).getString("URL") + "|| Rank = " +
-            // e.getValue()); The previous printing is time costly, comment it if
-            // you're not testing of debugging
-        }
-
-        return SortedList;
-    }
-
-    private List<ObjectId> getMatchingDocs(List<String> searchTokens,
-            String query) {
+    protected List<ObjectId> getMatchingDocs(List<String> searchTokens, String query) {
 
         List<ObjectId> docs = getCommonDocs(searchTokens);
 
         List<ObjectId> finalDocs = new ArrayList<>();
 
-        this.ProcessedDocs = new ArrayList<>();
+        ProcessedDocs = new ArrayList<>();
+
         for (ObjectId id : docs) {
             Document currDoc = db.getDocument(id.toString()); // getting the document by id
 
@@ -79,15 +34,14 @@ public class PhraseRanker extends Ranker {
             boolean flag = matcher.find();
 
             if (flag) {
-                finalDocs.add(currDoc.getObjectId(
-                        "_id")); // adding the documents that matches the query
-                ProcessedDocs.add(db.getDocument(
-                        id.toString())); // Saving documents to access db only once
-            }
+                finalDocs.add(currDoc.getObjectId("_id"));              // adding the documents that matches the query 
+                ProcessedDocs.add(db.getDocument(id.toString()));           //  Saving documents to access db only once
+            }                                                           
+            
         }
 
         return finalDocs;
-    }
+    }   
 
     private List<ObjectId> getCommonDocs(List<String> searchTokens) {
 

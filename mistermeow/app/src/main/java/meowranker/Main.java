@@ -6,16 +6,25 @@ import org.bson.types.ObjectId;
 public class Main {
     public static void main(String[] argv) {
 
-        PhraseRanker phRanker = new PhraseRanker();
+        Ranker ranker = new PhraseRanker();
 
         String query = "The dfl;akjf;asd Free Encyclopedia"; // tests searching for unfound token
-        phRanker.rank(query);
+        ranker.rank(query);
 
         query = "The Free Encyclopedia";
-        phRanker.rank(query);
+        ranker.rank(query);
+
+        // query = "Wikipedia";
+        // ranker.rank(query);
 
         query = "I love you";
-        phRanker.rank(query);
+        ranker.rank(query);
 
+
+        ranker = new QueryRanker();
+        ranker.rank("The Free Encyclopedia");
+
+        // QueryRanker Qr = new QueryRanker();
+        // Qr.rank("Wkiipedia the free encyclopedia");
     }
 }
