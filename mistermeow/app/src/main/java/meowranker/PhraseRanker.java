@@ -18,8 +18,7 @@ public class PhraseRanker extends Ranker {
     public List<ObjectId> rank(String query) {
 
         // applying PR algorithm
-        double[][] M = this.constructUrlsGraph();
-        double[] popularity = this.getPopularity(M, M.length);
+        double[] popularity = getPopularityArr();
 
         // Tokenizing query
         List<String> searchTokens = tokenizer.tokenizeString(query, true);
