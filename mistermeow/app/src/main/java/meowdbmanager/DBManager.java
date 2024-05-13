@@ -329,13 +329,22 @@ public class DBManager {
     }
   }
 
-  public Document getDocuments(List<ObjectId> docIDs) {
+  public List<Document> getDocuments(List<ObjectId> docIDs) {
     try {
-      Document doc = docCollection.find(new Document("_id", new ObjectId(docID))).first();
-      return doc;
+      List<Document> pipeline = new ArrayList<>();
+      pipeline.add(new Document("$match", new Document("_id", new Document("$in", docIDs))));
+      pipeline.add(new Document("$project", new Document()
+          .append("host", 1)
+          .append("URL", 1)
+          .append("title", 1)
+          .append("content", 1)));
+
+      List<Document> results = docCollection.aggregate(pipeline).into(new ArrayList<>());
+
+      return results;
     } catch (MongoException e) {
 
-      System.out.println("Error occurred while getting document: " +
+      System.out.println("Error occurred while getting docs: " +
           e.getMessage());
       return null;
     }
@@ -391,7 +400,7 @@ public class DBManager {
 
       List<Document> aggregationResult = invertedCollection.aggregate(pipeline).into(new ArrayList<>());
       for (Document doc : aggregationResult) {
-        docIds.add(doc.getObjectId("_id"));
+        docIds.add(new ObjectId(doc.getObjectId("_id").toString()));
       }
 
       return docIds;
