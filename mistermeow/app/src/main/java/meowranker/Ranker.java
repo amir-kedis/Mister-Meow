@@ -31,10 +31,9 @@ public class Ranker {
   public static double[] getPopularity(double[][] M, int UrlsCount) {
 
     double d = 0.85;
-    double[][] M_hat = new double[UrlsCount][UrlsCount];
     for (int i = 0; i < UrlsCount; i++) {
       for (int j = 0; j < UrlsCount; j++) {
-        M_hat[i][j] = d * M[i][j];
+        M[i][j] = d * M[i][j];
       }
     }
 
@@ -44,11 +43,11 @@ public class Ranker {
     for (int i = 0; i < UrlsCount; i++)
       prevRank[i] = 1.0 / (double) UrlsCount;
 
-    currRank = calculateCurrRank(prevRank, UrlsCount, d, M_hat);
+    currRank = calculateCurrRank(prevRank, UrlsCount, d, M);
 
     while (Norm(currRank, UrlsCount) - Norm(prevRank, UrlsCount) > 1e-10) {
       prevRank = currRank;
-      currRank = calculateCurrRank(prevRank, UrlsCount, d, M_hat);
+      currRank = calculateCurrRank(prevRank, UrlsCount, d, M);
     }
 
     // normalizing the final array
