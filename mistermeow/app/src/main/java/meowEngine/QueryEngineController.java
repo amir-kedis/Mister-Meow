@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import meowdbmanager.DBManager;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
@@ -59,9 +59,8 @@ public class QueryEngineController {
   }
 
   @GetMapping("/search")
-  public Document searchQuery(
-      @RequestParam("query") String query,
-      @RequestParam("page") int page) {
+  public Document searchQuery(@RequestParam("query") String query,
+                              @RequestParam("page") int page) {
 
     if (!query.equals(currentQuery))
       isFirstTime = true;
@@ -90,7 +89,8 @@ public class QueryEngineController {
     phrases[0] = phrases[1] = phrases[2] = null;
 
     Matcher phraseMatch = Pattern.compile("\"[^\"]+\"").matcher(query);
-    Matcher operatorMatch = Pattern.compile("\"\\s*(AND|OR|NOT)\\s*\"").matcher(query);
+    Matcher operatorMatch =
+        Pattern.compile("\"\\s*(AND|OR|NOT)\\s*\"").matcher(query);
 
     int i = 0;
     while (phraseMatch.find()) {
