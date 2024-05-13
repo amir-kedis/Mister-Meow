@@ -388,13 +388,12 @@ public class DBManager {
     }
   }
 
-  public List<ObjectId> getDocIDs(String[] tokens) {
+  public List<ObjectId> getDocIDs(List<String> tokens) {
     List<ObjectId> docIds = new ArrayList<>();
-    List<String> tokenList = Arrays.asList(tokens);
 
     try {
       List<Document> pipeline = new ArrayList<>();
-      pipeline.add(new Document("$match", new Document("token", new Document("$in", tokenList))));
+      pipeline.add(new Document("$match", new Document("token", new Document("$in", tokens))));
       pipeline.add(new Document("$unwind", "$docs"));
       pipeline.add(new Document("$project", new Document("_id", "$docs._id")));
 

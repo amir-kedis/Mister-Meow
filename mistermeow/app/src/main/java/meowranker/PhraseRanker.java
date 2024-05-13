@@ -21,7 +21,7 @@ public class PhraseRanker extends Ranker {
         double[] popularity = this.getPopularity(M, M.length);
 
         // Tokenizing query
-        List<String> searchTokens = tokenizer.tokenizeString(query);
+        List<String> searchTokens = tokenizer.tokenizeString(query, true);
         System.out.println(searchTokens);
 
         // getting docs common in all tokens & matches the query phrase

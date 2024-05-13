@@ -89,7 +89,7 @@ public class Tokenizer {
    */
   public HashMap<String, Token> tokenize(Document doc) {
     String text = doc.text();
-    List<String> tokens = tokenizeString(text);
+    List<String> tokens = tokenizeString(text, true);
     HashMap<String, Token> tokenMap = new HashMap<String, Token>();
 
     for (String token : tokens) {
@@ -121,16 +121,16 @@ public class Tokenizer {
    * @param text: String to tokenize
    * @return List of tokens
    */
-  public List<String> tokenizeString(String text) {
+  public List<String> tokenizeString(String text, boolean stem) {
     List<String> tokens = new ArrayList<String>();
     PorterStemmer stemmer = new PorterStemmer();
 
-    String cleanText = text.toLowerCase().replaceAll("[^a-zA-Z ]", "");
+    String cleanText = text.toLowerCase().replaceAll("[^a-z ]", "");
     String[] words = cleanText.split("\\s+");
 
     for (String word : words) {
       if (word.length() > 1 && !stopWords.contains(word)) {
-        String stemmedWord = stemmer.stem(word);
+        String stemmedWord = stem ? stemmer.stem(word) : word;
 
         if (!stemmedWord.equals(word))
           tokens.add(stemmer.stem(word));
@@ -149,9 +149,9 @@ public class Tokenizer {
    * @param doc:    Document to search for token positions
    */
   private void fillPosistions(HashMap<String, Token> tokens, Document doc) {
-    List<String> titleTokens = tokenizeString(doc.title());
-    List<String> h1Tokens = tokenizeString(doc.select("h1").text());
-    List<String> h2Tokens = tokenizeString(doc.select("h2").text());
+    List<String> titleTokens = tokenizeString(doc.title(), true);
+    List<String> h1Tokens = tokenizeString(doc.select("h1").text(), true);
+    List<String> h2Tokens = tokenizeString(doc.select("h2").text(), true);
 
     for (String token : tokens.keySet()) {
       Token t = tokens.get(token);
@@ -178,24 +178,25 @@ public class Tokenizer {
     System.out.println(ANSI_RESET);
 
     Document doc = null;
-    final String url = "https://en.wikipedia.org/wiki/Cat";
+    final String url = "https://www.imdb.com/chart/top/";
     try {
       doc = Jsoup.connect(url).get();
     } catch (IOException e) {
       e.printStackTrace();
     }
 
-    System.out.println("tokenizing: " + url + " : " + doc.title());
-    HashMap<String, Token> tokens = tokenize(doc);
-    // print sorted by count
-    System.out.println("Sorted by count:");
-    final String ANSI_YELLOW = "\u001B[33m";
-    final String ANSI_RESET2 = "\u001B[0m";
-    tokens.entrySet().stream().forEach(
-        e -> System.out.println(ANSI_YELLOW + "{ "
-            + "word: " + e.getKey() + ", "
-            + "count: " + e.getValue().count + ", "
-            + "position: " + e.getValue().position + " }" +
-            ANSI_RESET2));
+    System.out.println(doc);
+    // System.out.println("tokenizing: " + url + " : " + doc.title());
+    // HashMap<String, Token> tokens = tokenize(doc);
+    // // print sorted by count
+    // System.out.println("Sorted by count:");
+    // final String ANSI_YELLOW = "\u001B[33m";
+    // final String ANSI_RESET2 = "\u001B[0m";
+    // tokens.entrySet().stream().forEach(
+    // e -> System.out.println(ANSI_YELLOW + "{ "
+    // + "word: " + e.getKey() + ", "
+    // + "count: " + e.getValue().count + ", "
+    // + "position: " + e.getValue().position + " }" +
+    // ANSI_RESET2));
   }
 }

@@ -93,29 +93,32 @@ function SRP() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div className="col-span-2">
-                {data.results.map((result) => (
-                  <div className="mb-4" key={result.url}>
-                    <a href={result.url} target="_blank" rel="noreferrer">
-                      <div className="flex gap-2">
-                        <CatIcon />
-                        <div className="flex flex-col ">
-                          <span className="text-sm text-sr-host leading-tight">
-                            {result.host}
-                          </span>
-                          <span className="text-sm text-sr-url leading-tight hover:underline">
-                            {result.url}
-                          </span>
-                        </div>
+                {data.results.map(
+                  (result) =>
+                    result.snippets && (
+                      <div className="mb-4" key={result.URL}>
+                        <a href={result.URL} target="_blank">
+                          <div className="flex gap-2">
+                            <CatIcon />
+                            <div className="flex flex-col ">
+                              <span className="text-sm text-sr-host leading-tight">
+                                {result.host}
+                              </span>
+                              <span className="text-sm text-sr-url leading-tight hover:underline">
+                                {result.URL}
+                              </span>
+                            </div>
+                          </div>
+                          <h3 className="text-sr-title text-xl hover:underline">
+                            {result.title}
+                          </h3>
+                          <p className="text-sr-snippet leading-tight">
+                            {result.snippets}
+                          </p>
+                        </a>
                       </div>
-                      <h3 className="text-sr-title text-xl hover:underline">
-                        {result.title}
-                      </h3>
-                      <p className="text-sr-snippet leading-tight">
-                        {result.snippets}
-                      </p>
-                    </a>
-                  </div>
-                ))}
+                    ),
+                )}
                 <SRPPagination
                   page={Number(page)}
                   query={query}
