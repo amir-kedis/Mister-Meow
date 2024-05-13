@@ -1,138 +1,137 @@
 package meowranker;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PhraseRanker extends Ranker {
 
-    public PhraseRanker() {
-        super();
+  public PhraseRanker() { super(); }
+
+  // TODO: change function return type
+  public List<Document> rank(String query) {
+
+    // applying PR algorithm
+    double[][] M = this.constructUrlsGraph();
+    double[] popularity = this.getPopularity(M, M.length);
+
+    // Tokenizing query
+    List<String> searchTokens = tokenizer.tokenizeString(query);
+    System.out.println(searchTokens);
+
+    // getting docs common in all tokens & matches the query phrase
+    List<Document> matchedDocs = getMatchingDocs(searchTokens, query);
+
+    // System.out.println(matchedDocs.size());
+    // for (Document doc : matchedDocs) {
+    // System.out.println(doc.getString("URL"));
+    // }
+
+    // calculating relevance for each document
+    List<Double> relevance =
+        this.calculateRelevance(matchedDocs, searchTokens, popularity);
+
+    // for (Double val: relevance){
+    // System.out.println(val);
+    // }
+
+    List<Map.Entry<Document, Double>> finalRank =
+        this.combineRelWithPop(matchedDocs, relevance, popularity);
+
+    finalRank.sort(Map.Entry.comparingByValue());
+
+    System.out.println("======================================");
+    System.out.println("=========== Final Result =============");
+    System.out.println("======================================");
+
+    List<Document> SortedList = new ArrayList<>();
+    for (Map.Entry<Document, Double> e : finalRank) {
+      SortedList.add(e.getKey());
+      System.out.println(e.getKey().getString("URL") + " " + e.getValue());
     }
 
-    // TODO: change function return type
-    public List<Document> rank(String query) {
-        
-        //  applying PR algorithm
-        double [][] M = this.constructUrlsGraph();
-        double [] popularity = this.getPopularity(M , M.length);
+    // TODO: call function sort by higher rank
+    return SortedList;
+  }
 
-        //  Tokenizing query
-        List<String> searchTokens = tokenizer.tokenizeString(query);
-        System.out.println(searchTokens);
+  private List<Document> getMatchingDocs(List<String> searchTokens,
+                                         String query) {
 
+    List<Document> docs = getCommonDocs(searchTokens);
 
-        //  getting docs common in all tokens & matches the query phrase
-        List<Document> matchedDocs = getMatchingDocs(searchTokens, query);
-        
-        // System.out.println(matchedDocs.size());
-        // for (Document doc : matchedDocs) {
-        //     System.out.println(doc.getString("URL"));
-        // }
+    List<Document> finalDocs = new ArrayList<>();
 
-        // calculating  relevance for each document
-        List<Double> relevance = this.calculateRelevance(matchedDocs , searchTokens , popularity);
-        
-        // for (Double val: relevance){
-        //     System.out.println(val);
-        // }
+    for (Document doc : docs) {
+      ObjectId id = doc.getObjectId("_id");
+      Document currDoc =
+          db.getDocument(id.toString()); // getting the document by id
 
-        List<Map.Entry<Document , Double>> finalRank = this.combineRelWithPop(matchedDocs , relevance , popularity);
+      String content =
+          currDoc.getString("content"); // getting the content of the document
+      String text = Jsoup.parse(content).text(); // separating html from content
 
-        finalRank.sort(Map.Entry.comparingByValue());
-        
-        System.out.println("======================================");
-        System.out.println("=========== Final Result =============");
-        System.out.println("======================================");
+      String regex = "(?i)" + query; // making case-insensitive search
+      Pattern pattern = Pattern.compile(regex);
+      Matcher matcher = pattern.matcher(text);
 
-        List<Document> SortedList = new ArrayList<>();
-        for(Map.Entry<Document , Double> e:finalRank){
-            SortedList.add(e.getKey());
-            System.out.println(e.getKey().getString("URL") + " " + e.getValue());
-        }
+      boolean flag = matcher.find();
 
-
-
-        // TODO: call function sort by higher rank
-        return SortedList;
+      if (flag) // checking if the query is a part of the document
+        finalDocs.add(currDoc); // adding the documents that matches the query
     }
 
-    private List<Document> getMatchingDocs(List<String> searchTokens , String query) {
+    return finalDocs;
+  }
 
-        List<Document> docs = getCommonDocs(searchTokens);
-        
-        List<Document> finalDocs = new ArrayList<>();
+  private List<Document> getCommonDocs(List<String> searchTokens) {
 
-        for (Document doc : docs) {
-            ObjectId id = doc.getObjectId("_id");
-            Document currDoc = db.getDocument(id.toString()); // getting the document by id
+    if (searchTokens.size() == 0)
+      return new ArrayList<>();
 
-            String content = currDoc.getString("content"); // getting the content of the document
-            String text = Jsoup.parse(content).text(); // separating html from content
+    // getting the first token present in db
+    int ind = 0;
+    Document invertedInd = db.getInvertedIndex(searchTokens.get(0));
+    ind++;
 
-            String regex = "(?i)" + query; // making case-insensitive search
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(text);
-
-            boolean flag = matcher.find();
-
-            if (flag) // checking if the query is a part of the document
-                finalDocs.add(currDoc); // adding the documents that matches the query
-        }
-
-        return finalDocs;
+    while (invertedInd == null && ind < searchTokens.size()) {
+      invertedInd = db.getInvertedIndex(searchTokens.get(ind));
+      ind++;
     }
 
-    private List<Document> getCommonDocs(List<String> searchTokens) {
+    if (invertedInd == null)
+      return new ArrayList<>();
 
-        if (searchTokens.size() == 0)
-            return new ArrayList<>();
+    List<Document> docs = invertedInd.getList("docs", Document.class);
+    List<ObjectId> docsId = new ArrayList<>();
 
-        // getting the first token present in db
-        int ind = 0; 
-        Document invertedInd = db.getInvertedIndex(searchTokens.get(0));
-        ind++;
-        
-        while(invertedInd == null && ind< searchTokens.size()){
-            invertedInd = db.getInvertedIndex(searchTokens.get(ind));
-            ind++;
-        }
-        
-        if(invertedInd == null)
-            return new ArrayList<>();
-
-
-        List<Document> docs = invertedInd.getList("docs", Document.class);
-        List<ObjectId> docsId = new ArrayList<>();
-
-        for (Document doc : docs) {
-            docsId.add(doc.getObjectId("_id"));
-        }
-
-        for (int i = ind; i < searchTokens.size(); i++) {
-            
-            invertedInd = db.getInvertedIndex(searchTokens.get(i));
-            if (invertedInd != null) {
-
-                List<Document> currDocs = invertedInd.getList("docs", Document.class);
-                List<ObjectId> currDocsId = new ArrayList<>();
-
-                for (Document doc : currDocs) {
-                    currDocsId.add(doc.getObjectId("_id"));
-                }
-
-                docsId.retainAll(currDocsId);
-            }
-        }
-
-        List<Document> commonDocs = new ArrayList<>();
-        for (ObjectId id : docsId) {
-            commonDocs.add(db.getDocument(id.toString()));
-        }
-
-        return commonDocs;
+    for (Document doc : docs) {
+      docsId.add(doc.getObjectId("_id"));
     }
+
+    for (int i = ind; i < searchTokens.size(); i++) {
+
+      invertedInd = db.getInvertedIndex(searchTokens.get(i));
+      if (invertedInd != null) {
+
+        List<Document> currDocs = invertedInd.getList("docs", Document.class);
+        List<ObjectId> currDocsId = new ArrayList<>();
+
+        for (Document doc : currDocs) {
+          currDocsId.add(doc.getObjectId("_id"));
+        }
+
+        docsId.retainAll(currDocsId);
+      }
+    }
+
+    List<Document> commonDocs = new ArrayList<>();
+    for (ObjectId id : docsId) {
+      commonDocs.add(db.getDocument(id.toString()));
+    }
+
+    return commonDocs;
+  }
 }
