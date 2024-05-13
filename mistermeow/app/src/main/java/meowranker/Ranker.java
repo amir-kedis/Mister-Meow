@@ -11,19 +11,24 @@ import org.bson.types.ObjectId;
 
 public class Ranker {
 
-  public DBManager db;
-  public Tokenizer tokenizer;
+  public static DBManager db;
+  public static Tokenizer tokenizer;
+  public static int counter = 0;
+  public List<Document> ProcessedDocs;    //  used to access db only once while crawling
 
   public Ranker() {
     db = new DBManager();
     tokenizer = new Tokenizer();
+    
+    if (counter == 0)
+      calculatePopularity();
   }
 
   // The function takes graph of links between documents
   // where edge from doc1 to doc2 is representing by adding
   // 1/(outgoing urls from doc1) in the cell M[doc2][doc1]
   // resulting in matrix with sum of it's columns always = 1
-  public double[] getPopularity(double[][] M, int UrlsCount) {
+  public static double[] getPopularity(double[][] M, int UrlsCount) {
 
     double d = 0.85;
     double[][] M_hat = new double[UrlsCount][UrlsCount];
@@ -55,7 +60,7 @@ public class Ranker {
     return currRank;
   }
 
-  public double[] calculateCurrRank(double[] prevRank, int UrlsCount, double d,
+  public static double[] calculateCurrRank(double[] prevRank, int UrlsCount, double d,
       double[][] M_hat) {
 
     double[] currRank = new double[UrlsCount];
@@ -71,7 +76,7 @@ public class Ranker {
     return currRank;
   }
 
-  public double Norm(double[] vector, int size) {
+  public static double Norm(double[] vector, int size) {
     double norm = 0;
 
     for (int i = 0; i < size; i++) {
@@ -88,7 +93,7 @@ public class Ranker {
    * @return double[][] - a matrix of doubles, with size N * N,
    *         where N equal to number of urls in the database.
    */
-  public double[][] constructUrlsGraph() {
+  public static double[][] constructUrlsGraph() {
     // Number of nodes in graph is number of urls in database.
     int nodesNum = db.getUrlsCount();
     // Create a 2D array filled with 0s initialiy.
@@ -121,7 +126,7 @@ public class Ranker {
    *
    * @return double[] - an array of popularity for each url.
    */
-  public void calculatePopularity() {
+  public static void calculatePopularity() {
     double[][] M = constructUrlsGraph();
     double[] popularity = getPopularity(M, M.length);
 
@@ -137,7 +142,7 @@ public class Ranker {
    * @param graph    - the 2D matrix to fill.
    * @param nodesNum - the number of nodes and the size of the graph.
    */
-  public void constructMatrix(double[][] graph, int nodesNum) {
+  public static void constructMatrix(double[][] graph, int nodesNum) {
 
     // Loop over each node (url) and get it's parents array and construct graph.
     for (int i = 0; i < nodesNum; i++) {
@@ -162,7 +167,7 @@ public class Ranker {
    * @param graph    - the 2D matrix to scale.
    * @param nodesNum - the number of nodes and the size of the graph.
    */
-  public void scaleMatrix(double[][] graph, int nodesNum) {
+  public static void scaleMatrix(double[][] graph, int nodesNum) {
 
     // Loop over each column in the graph.
     for (int j = 0; j < nodesNum; j++) {
@@ -181,17 +186,16 @@ public class Ranker {
     }
   }
 
-  public List<Double> calculateRelevance(List<Document> docs,
+  public List<Double> calculateRelevance(List<ObjectId> docIds,
       List<String> searchTokens,
       double[] popularity) {
     List<Double> relevance = new ArrayList<>();
 
-    for (int i = 0; i < docs.size(); i++) {
+    for (int i = 0; i < docIds.size(); i++) {
       double val = 0;
       for (String token : searchTokens) {
         // summation(tf-idf)
-        val += db.getDocumentFromInverted(token, docs.get(i).getObjectId("_id")) *
-            getIDF(token);
+        val += db.getDocumentFromInverted(token, docIds.get(i)) * getIDF(token);
       }
       relevance.add(val);
     }
@@ -210,18 +214,18 @@ public class Ranker {
     return Math.log((double) db.getUrlsCount() / df);
   }
 
-  protected List<Map.Entry<Document, Double>> combineRelWithPop(List<Document> docs, List<Double> relevance,
+  protected List<Map.Entry<ObjectId, Double>> combineRelWithPop(List<ObjectId> docs, List<Double> relevance,
       double[] popularity) {
-    List<Map.Entry<Document, Double>> finalRank = new ArrayList<>();
+    List<Map.Entry<ObjectId, Double>> finalRank = new ArrayList<>();
     int ind = 0;
-    for (Document doc : docs) {
+    for (Document  doc : ProcessedDocs) {
       int ranker_id = doc.getInteger("ranker_id");
 
-      Map.Entry<Document, Double> entry = new AbstractMap.SimpleEntry<>(
-          doc, relevance.get(ind) + popularity[ranker_id]);
+      Map.Entry<ObjectId, Double> entry = new AbstractMap.SimpleEntry<>(
+          docs.get(ind), relevance.get(ind) + popularity[ranker_id]);
       finalRank.add(entry);
 
-      ind++;
+      ind++;  
     }
 
     return finalRank;
@@ -236,4 +240,5 @@ public class Ranker {
         System.out.println((double) invertedInd.getInteger("DF"));
     }
   }
+
 }
