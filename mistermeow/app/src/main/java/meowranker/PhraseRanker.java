@@ -11,55 +11,51 @@ public class PhraseRanker extends Ranker {
 
   public PhraseRanker() { super(); }
 
-  // TODO: change function return type
-  public List<Document> rank(String query) {
+    // TODO: change function return type
+    public List<ObjectId> rank(String query) {
 
-    // applying PR algorithm
-    double[][] M = this.constructUrlsGraph();
-    double[] popularity = this.getPopularity(M, M.length);
+        // applying PR algorithm
+        double[][] M = this.constructUrlsGraph();
+        double[] popularity = this.getPopularity(M, M.length);
 
-    // Tokenizing query
-    List<String> searchTokens = tokenizer.tokenizeString(query);
-    System.out.println(searchTokens);
+        // Tokenizing query
+        List<String> searchTokens = tokenizer.tokenizeString(query, true);
+        System.out.println(searchTokens);
 
-    // getting docs common in all tokens & matches the query phrase
-    List<Document> matchedDocs = getMatchingDocs(searchTokens, query);
+        // getting docs common in all tokens & matches the query phrase
+        List<Document> matchedDocs = getMatchingDocs(searchTokens, query);
 
-    // System.out.println(matchedDocs.size());
-    // for (Document doc : matchedDocs) {
-    // System.out.println(doc.getString("URL"));
-    // }
+        // System.out.println(matchedDocs.size());
+        // for (Document doc : matchedDocs) {
+        // System.out.println(doc.getString("URL"));
+        // }
 
-    // calculating relevance for each document
-    List<Double> relevance =
-        this.calculateRelevance(matchedDocs, searchTokens, popularity);
+        // calculating relevance for each document
+        List<Double> relevance = this.calculateRelevance(matchedDocs, searchTokens, popularity);
 
-    // for (Double val: relevance){
-    // System.out.println(val);
-    // }
+        // for (Double val: relevance){
+        // System.out.println(val);
+        // }
 
-    List<Map.Entry<Document, Double>> finalRank =
-        this.combineRelWithPop(matchedDocs, relevance, popularity);
+        List<Map.Entry<Document, Double>> finalRank = this.combineRelWithPop(matchedDocs, relevance, popularity);
 
-    finalRank.sort(Map.Entry.comparingByValue());
+        finalRank.sort(Map.Entry.comparingByValue());
 
-    System.out.println("======================================");
-    System.out.println("=========== Final Result =============");
-    System.out.println("======================================");
+        System.out.println("======================================");
+        System.out.println("=========== Final Result =============");
+        System.out.println("======================================");
 
-    List<Document> SortedList = new ArrayList<>();
-    for (Map.Entry<Document, Double> e : finalRank) {
-      SortedList.add(e.getKey());
-      System.out.println(e.getKey().getString("URL") + " " + e.getValue());
+        List<ObjectId> SortedList = new ArrayList<>();
+        for (Map.Entry<Document, Double> e : finalRank) {
+            SortedList.add(e.getKey().getObjectId("_id"));
+            System.out.println(e.getKey().getString("URL") + " " + e.getValue());
+        }
+
+        return SortedList;
     }
 
-    // TODO: call function sort by higher rank
-    return SortedList;
-  }
-
-  private List<Document> getMatchingDocs(List<String> searchTokens,
-                                         String query) {
-
+    private List<Document> getMatchingDocs(List<String> searchTokens, String query) {
+    
     List<Document> docs = getCommonDocs(searchTokens);
 
     List<Document> finalDocs = new ArrayList<>();
@@ -134,4 +130,5 @@ public class PhraseRanker extends Ranker {
 
     return commonDocs;
   }
+
 }

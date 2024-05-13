@@ -29,7 +29,7 @@ export default function SRPPagination({
   let showPages = [
     page > 1 ? page - 1 : -1,
     page,
-    page < numberOfPages ? page + 1 : numberOfPages,
+    page < numberOfPages ? page + 1 : -1,
   ];
 
   return (
@@ -56,15 +56,19 @@ export default function SRPPagination({
               </PaginationItem>
             ))}
 
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
+          {page < numberOfPages && (
+            <>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
 
-          <PaginationItem onClick={() => setPage(page + 1)}>
-            <Link to={`/search/${query}/${page + 1}`}>
-              <PaginationNext />
-            </Link>
-          </PaginationItem>
+              <PaginationItem onClick={() => setPage(page + 1)}>
+                <Link to={`/search/${query}/${page + 1}`}>
+                  <PaginationNext />
+                </Link>
+              </PaginationItem>
+            </>
+          )}
         </PaginationContent>
       </Pagination>
     </div>

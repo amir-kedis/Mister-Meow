@@ -48,6 +48,9 @@ function SRP() {
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Search button clicked");
+    if (query.trim() === "") {
+      return;
+    }
     navigate(`/search/${query}/1`);
   };
 
@@ -70,12 +73,6 @@ function SRP() {
         </div>
       </nav>
       <div className="flex-grow container">
-        {data && data.results?.length == 0 && (
-          <div className="flex place-items-center text-center justify-center font-bilya">
-            No results found
-          </div>
-        )}
-
         {data && (
           <div>
             <h6 className="font-inder mt-1 text-caption text-sm ">
@@ -93,29 +90,38 @@ function SRP() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div className="col-span-2">
-                {data.results.map((result) => (
-                  <div className="mb-4" key={result.url}>
-                    <a href={result.url} target="_blank" rel="noreferrer">
-                      <div className="flex gap-2">
-                        <CatIcon />
-                        <div className="flex flex-col ">
-                          <span className="text-sm text-sr-host leading-tight">
-                            {result.host}
-                          </span>
-                          <span className="text-sm text-sr-url leading-tight hover:underline">
-                            {result.url}
-                          </span>
-                        </div>
-                      </div>
-                      <h3 className="text-sr-title text-xl hover:underline">
-                        {result.title}
-                      </h3>
-                      <p className="text-sr-snippet leading-tight">
-                        {result.snippets}
-                      </p>
-                    </a>
+                {data && data.results?.length == 0 && (
+                  <div className="flex place-items-center text-center justify-center min-h-[60vh] font-bilya">
+                    No results found
                   </div>
-                ))}
+                )}
+
+                {data.results.map(
+                  (result) =>
+                    result.snippets && (
+                      <div className="mb-4" key={result.URL}>
+                        <a href={result.URL} target="_blank">
+                          <div className="flex gap-2">
+                            <CatIcon />
+                            <div className="flex flex-col ">
+                              <span className="text-sm text-sr-host leading-tight">
+                                {result.host}
+                              </span>
+                              <span className="text-sm text-sr-url leading-tight hover:underline">
+                                {result.URL}
+                              </span>
+                            </div>
+                          </div>
+                          <h3 className="text-sr-title text-xl hover:underline">
+                            {result.title}
+                          </h3>
+                          <p className="text-sr-snippet leading-tight">
+                            {result.snippets}
+                          </p>
+                        </a>
+                      </div>
+                    ),
+                )}
                 <SRPPagination
                   page={Number(page)}
                   query={query}

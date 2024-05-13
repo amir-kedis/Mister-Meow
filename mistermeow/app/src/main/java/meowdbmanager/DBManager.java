@@ -393,6 +393,27 @@ public class DBManager {
     }
   }
 
+  public List<Document> getDocuments(List<ObjectId> docIDs) {
+    try {
+      List<Document> pipeline = new ArrayList<>();
+      pipeline.add(new Document("$match", new Document("_id", new Document("$in", docIDs))));
+      pipeline.add(new Document("$project", new Document()
+          .append("host", 1)
+          .append("URL", 1)
+          .append("title", 1)
+          .append("content", 1)));
+
+      List<Document> results = docCollection.aggregate(pipeline).into(new ArrayList<>());
+
+      return results;
+    } catch (MongoException e) {
+
+      System.out.println("Error occurred while getting docs: " +
+          e.getMessage());
+      return null;
+    }
+  }
+
   public Document getInvertedIndex(String token) {
     try {
       Document indices =
@@ -433,21 +454,19 @@ public class DBManager {
     }
   }
 
-  public List<String> getDocs(String[] tokens) {
-    List<String> docIds = new ArrayList<>();
-    List<String> tokenList = Arrays.asList(tokens);
+  public List<ObjectId> getDocIDs(List<String> tokens) {
+    List<ObjectId> docIds = new ArrayList<>();
 
     try {
       List<Document> pipeline = new ArrayList<>();
-      pipeline.add(new Document(
-          "$match", new Document("token", new Document("$in", tokenList))));
+      pipeline.add(new Document("$match", new Document("token", new Document("$in", tokens))));
       pipeline.add(new Document("$unwind", "$docs"));
       pipeline.add(new Document("$project", new Document("_id", "$docs._id")));
 
       List<Document> aggregationResult =
           invertedCollection.aggregate(pipeline).into(new ArrayList<>());
       for (Document doc : aggregationResult) {
-        docIds.add(doc.getObjectId("_id").toString());
+        docIds.add(new ObjectId(doc.getObjectId("_id").toString()));
       }
 
       return docIds;
