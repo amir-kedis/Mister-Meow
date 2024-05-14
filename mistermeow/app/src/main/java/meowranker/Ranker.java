@@ -1,14 +1,12 @@
 
 package meowranker;
 
-import com.google.common.collect.Table;
 import java.lang.Math;
 import java.util.*;
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.query.Query;
 
 public abstract class Ranker {
 
@@ -49,19 +47,21 @@ public abstract class Ranker {
 
     finalRank.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
 
-    System.out.println("======================================");
-    System.out.println("=========== Final Result =============");
-    System.out.println("======================================");
+    // System.out.println("======================================");
+    // System.out.println("=========== Final Result =============");
+    // System.out.println("======================================");
 
     List<ObjectId> SortedList = new ArrayList<>();
     for (Map.Entry<ObjectId, Double> e : finalRank) {
       SortedList.add(e.getKey());
-      System.out
-          .println("URL: " + db.getDocument(e.getKey().toString()).getString("URL") + " || Rank = " + e.getValue());
+      // System.out
+      // .println("URL: " + db.getDocument(e.getKey().toString()).getString("URL") + "
+      // || Rank = " + e.getValue());
       // The previous printing is time costly, comment it if you're not testing of
       // debugging
     }
 
+    System.out.println("Ranking finished!");
     return SortedList;
   }
 
@@ -151,7 +151,7 @@ public abstract class Ranker {
   }
 
   public double[] getPopularityArr() {
-    int numberOfUrls = db.getUrlsCount();
+    // int numberOfUrls = db.getUrlsCount();
     // double[] popularityArr = new double[numberOfUrls];
 
     // for (int i = 0; i < numberOfUrls; i++) {
@@ -239,10 +239,10 @@ public abstract class Ranker {
       double val = 0;
       for (String token : searchTokens) {
         // summation(tf-idf)
-        String position = db.getPoisitionFromInverted(token, docIds.get(i));
+        String position = db.getPositionFromInverted(token, docIds.get(i));
 
         val += db.getDocumentFromInverted(token, docIds.get(i)) * getIDF(token);
-        if (!position.equals("other"))
+        if (position != null && !position.equals("other"))
           val += boost;
         // NOTE: uncomment when testing
         // System.out.println(
@@ -255,8 +255,8 @@ public abstract class Ranker {
       relevance.add(val);
     }
 
-    if(this instanceof QueryRanker){
-      QueryRanker ranker = (QueryRanker)this;
+    if (this instanceof QueryRanker) {
+      QueryRanker ranker = (QueryRanker) this;
       relevance = ranker.addQueryDocRel(relevance);
     }
 
@@ -267,7 +267,7 @@ public abstract class Ranker {
     double df;
     Document invertedInd = db.getInvertedIndex(token);
 
-    if (invertedInd == null) // Handling tokens that are not in any documnets
+    if (invertedInd == null) // Handling tokens that are not in any documents
       return 0;
 
     df = (double) db.getInvertedIndex(token).getInteger("DF");

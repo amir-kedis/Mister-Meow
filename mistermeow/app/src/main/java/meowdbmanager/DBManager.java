@@ -414,14 +414,13 @@ public class DBManager {
   public List<Document> getDocuments(List<ObjectId> docIDs) {
     try {
       List<Document> pipeline = new ArrayList<>();
-      pipeline.add(new Document(
-          "$match", new Document("_id", new Document("$in", docIDs))));
+      pipeline.add(new Document("$match", new Document("_id", new Document("$in", docIDs))));
       pipeline.add(new Document("$project", new Document()
           .append("host", 1)
           .append("URL", 1)
           .append("title", 1)
-          .append("content", 1))
-          .append("ranker_id" , 1));
+          .append("content", 1)
+          .append("ranker_id", 1)));
 
       List<Document> results = docCollection.aggregate(pipeline).into(new ArrayList<>());
 
@@ -473,12 +472,12 @@ public class DBManager {
     }
   }
 
-  public String getPoisitionFromInverted(String token, ObjectId docID) {
+  public String getPositionFromInverted(String token, ObjectId docID) {
     try {
       Document query = new Document("token", token).append("docs._id", docID);
 
       Document result = invertedCollection.find(query)
-          .projection(new Document("docs.$", 1))
+          .projection(new Document("docs", 1))
           .first();
 
       if (result != null)

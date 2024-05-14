@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import meowdbmanager.DBManager;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
@@ -13,9 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
-import meowranker.PhraseRanker;
+import meowranker.*;
 
-//TODO: normal queries with ranking
 //TODO: bold in snippts
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -23,13 +21,13 @@ import meowranker.PhraseRanker;
 public class QueryEngineController {
   private DBManager dbManager;
   private Tokenizer tokenizer;
-  private PhraseRanker phraseRanker;
+  private Ranker ranker, phraseRanker;
   private List<ObjectId> docs;
   private String currentQuery;
   private boolean isPhraseMatching, isFirstTime;
   private String[] phrases;
   private int[] operators; // 0: None, 1: AND, 2: OR, 3: NOT
-  private List<String> tokens, tags, suggestions;
+  private List<String> tokens, suggestions;
   private int resultCount;
   private final int numOfDocsInPage = 20, windowCharSize = 100;
 
@@ -37,13 +35,13 @@ public class QueryEngineController {
     dbManager = new DBManager();
     tokenizer = new Tokenizer();
     phraseRanker = new PhraseRanker();
+    ranker = new QueryRanker();
     docs = new ArrayList<>();
     currentQuery = "";
     isPhraseMatching = false;
     isFirstTime = true;
     phrases = new String[3];
     operators = new int[2];
-    tags = new ArrayList<>();
     tokens = new ArrayList<>();
     suggestions = new ArrayList<>();
     resultCount = 0;
@@ -72,7 +70,6 @@ public class QueryEngineController {
       parse(currentQuery);
       dbManager.insertSuggestion(currentQuery);
       tokens = tokenizer.tokenizeString(currentQuery, false);
-      tags = tokenizer.tokenizeString(currentQuery, false);
       docs = rankDocs();
       isFirstTime = false;
       resultCount = docs.size();
@@ -129,11 +126,10 @@ public class QueryEngineController {
         availableCount--;
     }
 
-    System.out.println("Results: " + results);
     Document data = new Document("results", results)
         .append("count", resultCount)
         .append("availableCount", availableCount)
-        .append("tags", tags)
+        .append("tags", tokens)
         .append("suggestions", suggestions);
 
     return data;
@@ -147,6 +143,8 @@ public class QueryEngineController {
       Matcher stringMatch = Pattern.compile("\\b" + string + "\\b").matcher(textContent);
       if (stringMatch.find()) {
         int index = stringMatch.start();
+        textContent = textContent.substring(0, index) + "*" + string + "*"
+            + textContent.substring(index + string.length());
         int start = Math.max(0, index - windowCharSize);
         int end = Math.min(textContent.length(), index + windowCharSize);
         return textContent.substring(start, end);
@@ -163,10 +161,9 @@ public class QueryEngineController {
         useOperator(docIDs, operators[0], 1);
       if (phrases[2] != null)
         useOperator(docIDs, operators[1], 2);
-      System.out.println("DocIDs: " + docIDs);
       return docIDs;
     }
-    return dbManager.getDocIDs(tags);
+    return ranker.rank(currentQuery);
   }
 
   private void useOperator(List<ObjectId> docIDs, int operator, int phraseIndex) {
