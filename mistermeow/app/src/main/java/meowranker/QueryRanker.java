@@ -46,10 +46,11 @@ public class QueryRanker extends Ranker{
     protected List<Double> addQueryDocRel(List<Double> relevance){
         int ind = 0;
         for(Double val:relevance){
+            if(ind >= QueryDocRel.size())
+                break;
             val*=QueryDocRel.get(ind);
             ind++;
         }
-
 
         return relevance;   
     }

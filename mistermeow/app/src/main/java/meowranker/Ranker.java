@@ -235,32 +235,43 @@ public abstract class Ranker {
 
     final double boost = 1.1; // 10% boost for the relevance
 
-    for (int i = 0; i < docIds.size(); i++) {
-      double val = 0;
-      for (String token : searchTokens) {
-        // summation(tf-idf)
-        String position = db.getPositionFromInverted(token, docIds.get(i));
+    HashMap<ObjectId , Integer>mp = new HashMap<>();
+    for(ObjectId ob:docIds){
+        mp.put(ob , 1);
+    }
 
-        val += db.getDocumentFromInverted(token, docIds.get(i)) * getIDF(token);
-        if (position != null && !position.equals("other"))
-          val += boost;
-        // NOTE: uncomment when testing
-        // System.out.println(
-        // "Token: " + token + " IDF: " + getIDF(token) +
-        // " TF: " + db.getDocumentFromInverted(token, docIds.get(i)) +
-        // " Position: " + position);
+    for (String token : searchTokens) {
+
+      List<ObjectId> tokenDocs = db.getDocIDs(searchTokens);
+      double val =  0;
+      for(ObjectId ob:tokenDocs){
+        if(mp.containsKey(ob)){ 
+
+            Document doc = db.getTFandPositionFromInverted(token.toString() , ob); 
+          
+            if(doc == null)
+             continue;
+
+            String docPos = doc.getString("position");
+            double TF = doc.getDouble("TF");
+
+            if ( docPos!= null && !docPos.equals("other"))
+               val += boost;
+
+            val+=TF;
+            val *= getIDF(token);
+        }
+       
+        relevance.add(val);
       }
-      // System.out.println("Relevance: " + val);
+    } 
 
-      relevance.add(val);
-    }
+  if(this instanceof QueryRanker)  {
+    QueryRanker ranker = (QueryRanker) this;
+    relevance = ranker.addQueryDocRel(relevance);
+  }
 
-    if (this instanceof QueryRanker) {
-      QueryRanker ranker = (QueryRanker) this;
-      relevance = ranker.addQueryDocRel(relevance);
-    }
-
-    return relevance;
+  return relevance;
   }
 
   public double getIDF(String token) {
