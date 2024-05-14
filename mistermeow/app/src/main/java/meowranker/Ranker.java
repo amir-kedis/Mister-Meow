@@ -2,6 +2,7 @@
 package meowranker;
 
 import java.lang.Math;
+import java.time.Instant;
 import java.util.*;
 import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
@@ -12,7 +13,8 @@ public abstract class Ranker {
 
   public static DBManager db;
   public static Tokenizer tokenizer;
-  public List<Document> ProcessedDocs; // used to access db only once while crawling
+  public List<Document>
+      ProcessedDocs; // used to access db only once while crawling
 
   public Ranker() {
     db = new DBManager();
@@ -21,14 +23,19 @@ public abstract class Ranker {
 
   public List<ObjectId> rank(String query) {
 
+    System.out.println("Ranking started!" + Instant.now());
     double[] popularity = getPopularityArr();
 
     // Tokenizing query
     List<String> searchTokens = tokenizer.tokenizeString(query, true);
     System.out.println(searchTokens);
+    System.out.println("Tokenization finished!" + Instant.now());
 
     // getting docs common in all tokens & matches the query phrase
+
     List<ObjectId> matchedDocs = this.getMatchingDocs(searchTokens, query);
+
+    System.out.println("Matching Docs finished!" + Instant.now());
 
     System.out.println(matchedDocs.size() + " || " + ProcessedDocs.size());
     // for (Document doc : ProcessedDocs) {
@@ -37,15 +44,24 @@ public abstract class Ranker {
     // }
 
     // calculating relevance for each document
-    List<Double> relevance = this.calculateRelevance(matchedDocs, searchTokens, popularity);
+    List<Double> relevance =
+        this.calculateRelevance(matchedDocs, searchTokens, popularity);
 
     // for (Double val: relevance){
     // System.out.println(val);
     // }
+    //
+    System.out.println("Relevance calculation started!" + Instant.now());
 
-    List<Map.Entry<ObjectId, Double>> finalRank = combineRelWithPop(matchedDocs, relevance, popularity);
+    List<Map.Entry<ObjectId, Double>> finalRank =
+        combineRelWithPop(matchedDocs, relevance, popularity);
+
+    System.out.println("Combining relevance with popularity finished!" +
+                       Instant.now());
 
     finalRank.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+
+    System.out.println("Sorting finished!" + Instant.now());
 
     // System.out.println("======================================");
     // System.out.println("=========== Final Result =============");
@@ -55,17 +71,22 @@ public abstract class Ranker {
     for (Map.Entry<ObjectId, Double> e : finalRank) {
       SortedList.add(e.getKey());
       // System.out
-      // .println("URL: " + db.getDocument(e.getKey().toString()).getString("URL") + "
+      // .println("URL: " +
+      // db.getDocument(e.getKey().toString()).getString("URL") + "
       // || Rank = " + e.getValue());
-      // The previous printing is time costly, comment it if you're not testing of
-      // debugging
+      // The previous printing is time costly, comment it if you're not testing
+      // of debugging
     }
+
+    System.out.println("Writing to file started!" + Instant.now());
+    System.out.println("======================================");
 
     System.out.println("Ranking finished!");
     return SortedList;
   }
 
-  protected abstract List<ObjectId> getMatchingDocs(List<String> searchTokens, String query);
+  protected abstract List<ObjectId> getMatchingDocs(List<String> searchTokens,
+                                                    String query);
 
   // The function takes graph of links between documents
   // where edge from doc1 to doc2 is representing by adding
@@ -84,7 +105,7 @@ public abstract class Ranker {
     double[] currRank;
 
     for (int i = 0; i < UrlsCount; i++)
-      prevRank[i] = 1.0 / (double) UrlsCount;
+      prevRank[i] = 1.0 / (double)UrlsCount;
 
     currRank = calculateCurrRank(prevRank, UrlsCount, d, M);
 
@@ -103,7 +124,7 @@ public abstract class Ranker {
   }
 
   public static double[] calculateCurrRank(double[] prevRank, int UrlsCount,
-      double d, double[][] M_hat) {
+                                           double d, double[][] M_hat) {
 
     double[] currRank = new double[UrlsCount];
 
@@ -229,8 +250,8 @@ public abstract class Ranker {
   }
 
   public List<Double> calculateRelevance(List<ObjectId> docIds,
-      List<String> searchTokens,
-      double[] popularity) {
+                                         List<String> searchTokens,
+                                         double[] popularity) {
     List<Double> relevance = new ArrayList<>();
 
     final double boost = 1.1; // 10% boost for the relevance
@@ -239,9 +260,16 @@ public abstract class Ranker {
       double val = 0;
       for (String token : searchTokens) {
         // summation(tf-idf)
-        String position = db.getPositionFromInverted(token, docIds.get(i));
+        Document invertedInd =
+            db.getTFandPositionFromInverted(token, docIds.get(i));
+        if (invertedInd == null)
+          continue;
 
-        val += db.getDocumentFromInverted(token, docIds.get(i)) * getIDF(token);
+        String position = invertedInd.getString("position");
+
+        // val += db.getDocumentFromInverted(token, docIds.get(i)) *
+        // getIDF(token);
+        val += invertedInd.getDouble("TF") * getIDF(token);
         if (position != null && !position.equals("other"))
           val += boost;
         // NOTE: uncomment when testing
@@ -256,7 +284,7 @@ public abstract class Ranker {
     }
 
     if (this instanceof QueryRanker) {
-      QueryRanker ranker = (QueryRanker) this;
+      QueryRanker ranker = (QueryRanker)this;
       relevance = ranker.addQueryDocRel(relevance);
     }
 
@@ -270,12 +298,13 @@ public abstract class Ranker {
     if (invertedInd == null) // Handling tokens that are not in any documents
       return 0;
 
-    df = (double) db.getInvertedIndex(token).getInteger("DF");
-    return Math.log((double) db.getUrlsCount() / df);
+    df = (double)db.getInvertedIndex(token).getInteger("DF");
+    return Math.log((double)db.getUrlsCount() / df);
   }
 
-  protected List<Map.Entry<ObjectId, Double>> combineRelWithPop(List<ObjectId> docs, List<Double> relevance,
-      double[] popularity) {
+  protected List<Map.Entry<ObjectId, Double>>
+  combineRelWithPop(List<ObjectId> docs, List<Double> relevance,
+                    double[] popularity) {
     List<Map.Entry<ObjectId, Double>> finalRank = new ArrayList<>();
     int ind = 0;
     for (Document doc : ProcessedDocs) {
@@ -297,7 +326,7 @@ public abstract class Ranker {
       if (invertedInd == null)
         System.out.println(0);
       else
-        System.out.println((double) invertedInd.getInteger("DF"));
+        System.out.println((double)invertedInd.getInteger("DF"));
     }
   }
 }

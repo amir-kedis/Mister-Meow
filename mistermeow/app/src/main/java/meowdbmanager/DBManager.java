@@ -522,6 +522,31 @@ public class DBManager {
     }
   }
 
+  public Document getTFandPositionFromInverted(String token, ObjectId docId) {
+    try {
+      Document query = new Document("token", token).append("docs._id", docId);
+
+      Document docs = invertedCollection.find(query)
+                          .projection(new Document("docs", 1))
+                          .first();
+
+      if (docs == null)
+        return null;
+
+      Document result = new Document("TF", 0).append("position", "other");
+      result.append(
+          "TF", docs.getList("docs", Document.class).get(0).getDouble("TF"));
+      return result;
+    }
+
+    catch (MongoException e) {
+
+      System.out.println("Error occurred while getting indices: " +
+                         e.getMessage());
+      return null;
+    }
+  }
+
   public List<ObjectId> getDocIDs(List<String> tokens) {
     List<ObjectId> docIds = new ArrayList<>();
 
