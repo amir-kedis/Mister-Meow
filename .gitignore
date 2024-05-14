@@ -4,3 +4,4 @@ mistermeow/.project
 mistermeow/.settings/org.eclipse.buildship.core.prefs
 mistermeow/app/.settings
 mistermeow/app/src/meowapp/node_modules
+.vscode/*
