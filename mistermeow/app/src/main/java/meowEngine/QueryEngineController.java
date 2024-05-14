@@ -15,6 +15,8 @@ import meowdbmanager.DBManager;
 import meowindexer.Tokenizer;
 import meowranker.PhraseRanker;
 
+//TODO: normal queries with ranking
+//TODO: bold in snippts
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/")
@@ -60,7 +62,7 @@ public class QueryEngineController {
 
   @GetMapping("/search")
   public Document searchQuery(@RequestParam("query") String query,
-                              @RequestParam("page") int page) {
+      @RequestParam("page") int page) {
 
     if (!query.equals(currentQuery))
       isFirstTime = true;
@@ -84,13 +86,12 @@ public class QueryEngineController {
   }
 
   private void parse(String query) {
-    isPhraseMatching = false;
+    isPhraseMatching = true;
     operators[0] = operators[1] = 0;
     phrases[0] = phrases[1] = phrases[2] = null;
 
     Matcher phraseMatch = Pattern.compile("\"[^\"]+\"").matcher(query);
-    Matcher operatorMatch =
-        Pattern.compile("\"\\s*(AND|OR|NOT)\\s*\"").matcher(query);
+    Matcher operatorMatch = Pattern.compile("\"\\s*(AND|OR|NOT)\\s*\"").matcher(query);
 
     int i = 0;
     while (phraseMatch.find()) {
@@ -98,46 +99,54 @@ public class QueryEngineController {
       phrases[i++] = phrase;
     }
 
-    i = 0;
-    while (operatorMatch.find()) {
-      String operator = operatorMatch.group().replaceAll("^\"|\"$", "").trim();
-      operators[i++] = operator.equals("AND") ? 1
-          : operator.equals("OR") ? 2
-              : 3;
+    if (phrases[0] == null) {
+      isPhraseMatching = false;
+    } else {
+      i = 0;
+      while (operatorMatch.find()) {
+        String operator = operatorMatch.group().replaceAll("^\"|\"$", "").trim();
+        operators[i++] = operator.equals("AND") ? 1
+            : operator.equals("OR") ? 2
+                : 3;
+      }
     }
 
-    isPhraseMatching = phrases[0] != null;
-    operators[0] = operators[1] = 0;
   }
 
   private Document getResults(List<ObjectId> docs) {
 
     List<Document> results = dbManager.getDocuments(docs);
+    int availableCount = resultCount;
+
     for (Document result : results) {
       String doc = result.getString("content");
-      String snippet = isPhraseMatching ? getSnippet(doc, phrases[0])
-          : getSnippet(doc, tokens);
+      String snippet = isPhraseMatching ? getSnippet(doc)
+          : getSnippet(doc);
       result.remove("content");
       result.remove("_id");
       result.append("snippets", snippet);
+      if (snippet == null)
+        availableCount--;
     }
 
-    System.out.println(results);
+    System.out.println("Results: " + results);
     Document data = new Document("results", results)
         .append("count", resultCount)
+        .append("availableCount", availableCount)
         .append("tags", tags)
         .append("suggestions", suggestions);
 
     return data;
   }
 
-  public String getSnippet(String doc, List<String> tokens) {
+  public String getSnippet(String doc) {
     String textContent = Jsoup.parse(doc).text();
+    List<String> strings = isPhraseMatching ? Arrays.asList(phrases) : tokens;
 
-    for (String token : tokens) {
-      Matcher tokenMatch = Pattern.compile("\\b" + token + "\\b").matcher(textContent);
-      if (tokenMatch.find()) {
-        int index = tokenMatch.start();
+    for (String string : strings) {
+      Matcher stringMatch = Pattern.compile("\\b" + string + "\\b").matcher(textContent);
+      if (stringMatch.find()) {
+        int index = stringMatch.start();
         int start = Math.max(0, index - windowCharSize);
         int end = Math.min(textContent.length(), index + windowCharSize);
         return textContent.substring(start, end);
@@ -147,23 +156,26 @@ public class QueryEngineController {
     return null;
   }
 
-  public String getSnippet(String doc, String phrase) {
-    String textContent = Jsoup.parse(doc).text();
-
-    Matcher phraseMatch = Pattern.compile("//b" + phrase + "//b").matcher(textContent);
-    if (phraseMatch.find()) {
-      int index = phraseMatch.start();
-      int start = Math.max(0, index - windowCharSize);
-      int end = Math.min(textContent.length(), index + windowCharSize);
-      return textContent.substring(start, end);
+  private List<ObjectId> rankDocs() {
+    if (isPhraseMatching) {
+      List<ObjectId> docIDs = phraseRanker.rank(phrases[0]);
+      if (phrases[1] != null)
+        useOperator(docIDs, operators[0], 1);
+      if (phrases[2] != null)
+        useOperator(docIDs, operators[1], 2);
+      System.out.println("DocIDs: " + docIDs);
+      return docIDs;
     }
-
-    return null;
+    return dbManager.getDocIDs(tags);
   }
 
-  private List<ObjectId> rankDocs() {
-    if (isPhraseMatching)
-      return phraseRanker.rank(phrases[0]);
-    return dbManager.getDocIDs(tags);
+  private void useOperator(List<ObjectId> docIDs, int operator, int phraseIndex) {
+    System.out.println("Operator: " + operator + " PhraseIndex: " + phraseIndex);
+    if (operator == 1)
+      docIDs.retainAll(phraseRanker.rank(phrases[phraseIndex]));
+    else if (operator == 2)
+      docIDs.addAll(phraseRanker.rank(phrases[phraseIndex]));
+    else if (operator == 3)
+      docIDs.removeAll(phraseRanker.rank(phrases[phraseIndex]));
   }
 }
