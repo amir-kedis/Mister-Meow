@@ -113,7 +113,7 @@ function SRP() {
                               <span className="text-sm text-sr-host leading-tight">
                                 {result.host}
                               </span>
-                              <span className="text-sm truncate max-w-[80ch] text-sr-url leading-tight hover:underline">
+                              <span className="text-sm truncate max-w-[70ch] text-sr-url leading-tight hover:underline">
                                 {result.URL}
                               </span>
                             </div>
