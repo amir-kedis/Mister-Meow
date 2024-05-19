@@ -122,7 +122,17 @@ function SRP() {
                             {result.title}
                           </h3>
                           <p className="text-sr-snippet leading-tight">
-                            {result.snippets}
+                            {result.snippets
+                              .split("*")
+                              .map((snippet, index) => (
+                                <>
+                                  {index == 1 ? (
+                                    <strong>{snippet}</strong>
+                                  ) : (
+                                    snippet
+                                  )}
+                                </>
+                              ))}
                           </p>
                         </a>
                       </div>
