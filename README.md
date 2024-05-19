@@ -7,9 +7,19 @@
     🐈 Mister Meow 🐈
 </h1>
 
-## 📹 Demo
+## 📹 Video Demo
 
 https://github.com/amir-kedis/Mister-Meow/assets/88613195/fb2a0634-326d-41d2-bda4-1d5d5c815f54
+
+---
+
+## 📈 Performance
+
+> [!IMPORTANT]
+>
+> 1. 🕷 Crawler: **1000** pages in **1m12s** with 64 threads
+> 2. 📓 Indexer: **1000** pages in **47s** with 50 threads
+> 3. 🔎 Search: search is not stable enough but in general it could be improved in the ranker.
 
 ---
 
@@ -57,17 +67,7 @@ https://github.com/amir-kedis/Mister-Meow/assets/88613195/fb2a0634-326d-41d2-bda
 
 ---
 
-## 📈 Performance
-
-> [!IMPORTANT]
->
-> 1. 🕷 Crawler: **1000** pages in **1m12s** with 64 threads
-> 2. 📓 Indexer: **1000** pages in **47s** with 50 threads
-> 3. 🔎 Search: search is not stable enough but in general it could be improved in the ranker.
-
----
-
-## System Design
+## 🤔 System Design
 
 ### Basic System component
 
@@ -80,6 +80,66 @@ https://github.com/amir-kedis/Mister-Meow/assets/88613195/fb2a0634-326d-41d2-bda
 ### Build Inverted Index Algorithm
 
 ![Build Index](./docs/imgs/build-the-index-algo.excalidraw.png)
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Java 11
+- Gradle
+- MongoDB
+- Node
+
+> [!NOTE]
+> to install java and gradle see the [Java setup](/docs/conventions/java-env.md) document
+> to install mongo see the [mongo setup](/docs/conventions/mongo.md) document
+
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone <repo-url>
+```
+
+2. Install the dependencies
+
+```bash
+cd Mister-Meow
+cd mistermeow
+gradle build
+```
+
+3. To run the crawler
+
+```bash
+sudo systemctl start mongod # have to be done once
+gradle crawl
+```
+
+4. To run the indexer
+
+```bash
+gradle index
+```
+
+5. To run the server
+
+```bash
+gradle engine
+```
+
+6. To install and run the web application
+
+```bash
+cd app/src/meowapp
+npm install
+npm run dev
+```
+
+---
 
 ## Contributions
 
