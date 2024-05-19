@@ -13,6 +13,50 @@ https://github.com/amir-kedis/Mister-Meow/assets/88613195/fb2a0634-326d-41d2-bda
 
 ---
 
+## ✨ Features
+
+- **MeowCrawler**: crawl the web and insert the data into the database.
+  - multi-threading
+  - multi level host priority queue
+  - handles robots.txt
+  - url hashing and content hashing to prevent duplicate content
+  - url filtering
+  - url normalization
+  - seeding with a list of urls
+  - Incremental crawling - could be paused and resumed
+  - creates a sitemap graph for the ranking algorithm
+- **MeowIndexer**: tokenize and index the crawled data.
+  - multi-threading
+  - store in a inverted index collection
+  - get the TF and position of the tokens.
+  - handles stemming **(Porter Stemmer)** PS: we are required to give higher priority to exact tokens\_
+  - handles stop words
+  - incremental indexing - could be paused and resumed
+- **MeowRanker**: search the indexed data.
+  - search for the query in the inverted index
+  - use Google Page Rank algorithm to give popularity to the pages
+  - rank the results based on the TF-IDF algorithm
+  - phrase matching
+  - higher rank bonus for the exact match then stems
+  - higher rank bonus for words in important tags like title, h1, h2, etc.
+- **MeowEngine**: query engine and server.
+  - RESTful API
+  - snippet generation
+  - search suggestions and history
+  - query parsing
+  - phrase matching queries
+  - AND, OR, NOT operators in queries
+  - stop words and stemming
+  - pagination
+  - cache
+- **MeowApp**: web application.
+  - Fancy Custom theming 4 themes are available (light, dark, rose, and black)
+  - Powerful Search bar and suggestions components
+  - fancy pagination element
+  - navigation and data loading with react-router 6
+
+---
+
 ## 📈 Performance
 
 > [!IMPORTANT]
