@@ -21,7 +21,9 @@ https://github.com/amir-kedis/Mister-Meow/assets/88613195/fb2a0634-326d-41d2-bda
 > 2. 📓 Indexer: **1000** pages in **47s** with 50 threads
 > 3. 🔎 Search: search is not stable enough but in general it could be improved in the ranker.
 
-## Draft System Design
+---
+
+## System Design
 
 ### Basic System component
 
@@ -31,7 +33,7 @@ https://github.com/amir-kedis/Mister-Meow/assets/88613195/fb2a0634-326d-41d2-bda
 
 ![indexer DB Design](./docs/imgs/IndexerDB.excalidraw.png)
 
-### Build Inverte Index Algorithem
+### Build Inverted Index Algorithm
 
 ![Build Index](./docs/imgs/build-the-index-algo.excalidraw.png)
 
