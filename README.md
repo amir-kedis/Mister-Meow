@@ -83,6 +83,20 @@ https://github.com/amir-kedis/Mister-Meow/assets/88613195/fb2a0634-326d-41d2-bda
 
 ---
 
+## 🔨 Technologies
+
+- **Java**
+- **Gradle**
+- **MongoDB**
+- **Spring Boot** - for the server only
+- **==FRONTEND==**
+  - **React**
+  - **TypeScript**
+  - **Tailwind CSS**
+  - **React Router 6**
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
